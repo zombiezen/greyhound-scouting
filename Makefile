@@ -7,6 +7,7 @@ TARG=scouting
 GOFILES=\
 	main.go\
 	model.go\
+	server.go\
 	team.go\
 
 include $(GOROOT)/src/Make.cmd
