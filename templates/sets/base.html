@@ -1,10 +1,16 @@
 {{define "doctype.html"}}<!DOCTYPE html>{{end}}
 
 {{define "css.html"}}
-    {{/* TODO: Add HTML5 shiv */}}
+    <!-- HTML 5 support -->
+    <!--[if IE]>
+    <script src="{{route "static" "path" "/js/html5.js"}}"></script>
+    <![endif]-->
     <style>article, aside, dialog, figure, footer, header, hgroup, menu, nav, section { display: block; }</style>
     <!-- CSS -->
-    {{/* TODO: Add CSS */}}
+    <link rel="stylesheet" type="text/css" href="{{route "static" "path" "/css/reset.css"}}">
+    <link rel="stylesheet" type="text/css" href="{{route "static" "path" "/css/generic.css"}}">
+    <link rel="stylesheet" type="text/css" href="{{route "static" "path" "/css/style.css"}}">
+    <link rel="stylesheet" type="text/css" href="{{route "static" "path" "/css/layout.css"}}">
 {{end}}
 
 {{define "jumpbar.html"}}
@@ -12,6 +18,10 @@
         <input id="jumpbar" name="q" type="text" size="20">
         <input type="submit" value="Jump">
     </form>
+{{end}}
+
+{{define "logo.html"}}
+    <h1><a href="{{route "root"}}">Scouting</a></h1>
 {{end}}
 
 {{define "default-links.html"}}
@@ -32,7 +42,13 @@
 {{end}}
 
 {{define "jquery.html"}}
-    {{/* TODO */}}
+    <script type="text/javascript" src="{{route "static" "path" "/js/jquery.js"}}"></script>
+    <script type="text/javascript" src="{{route "static" "path" "/js/jquery.urls.js"}}"></script>
+    <!-- Scripts -->
+    <script type="text/javascript">
+        $.setSiteRoot('{{route "root" | js}}');
+        $.setStaticRoot('{{route "static" "path" "/" | js }}');
+    </script>
 {{end}}
 
 {{define "watermark.html"}}

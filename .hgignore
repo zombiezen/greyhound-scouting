@@ -1,1 +1,4 @@
 ^scouting$
+^static/css/.*\.css$
+syntax:glob
+.sass-cache

@@ -1,0 +1,211 @@
+/*
+ *  style.css
+ *  scouting
+ *
+ *  Created by Ross Light on 1/12/11.
+ */
+
+$content-background: #E8DAC3;
+$red-color: #B01527;
+$blue-color: #4F57B8;
+
+html, body
+{
+    background: black;
+    font-family: Tahoma, Helvetica, Arial, sans-serif;
+}
+
+header
+{
+    background: #E09C2D;
+
+    &>h1
+    {
+        margin: 0;
+        font-size: 200%;
+        text-transform: uppercase;
+
+    }
+
+    &>nav
+    {
+        font-size: 110%;
+
+        a
+        {
+            font-weight: bold;
+        }
+
+        a:before
+        {
+            content: "\2022";
+            margin-left: 1ex;
+            margin-right: 1ex;
+        }
+    }
+
+    :link, :visited, :hover
+    {
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+#jumpbar_form
+{
+    display: inline;
+}
+
+#main
+{
+    background: $content-background;
+    border: thin solid black;
+}
+
+#content_area p
+{
+    margin-bottom: 1em;
+}
+
+.team_list
+{
+    .team_number
+    {
+        text-align: right;
+        font-weight: bold;
+    }
+}
+
+@media screen
+{
+    #robot_info
+    {
+        position: absolute;
+        left: 50%;
+        float: right;
+
+        margin-left: 2em;
+    }
+}
+
+.listing
+{
+    .odd .red_alliance
+    {
+        background: lighten($red-color, 30%);
+    }
+
+    .odd .blue_alliance
+    {
+        background: lighten($blue-color, 30%);
+    }
+
+    .score.winner
+    {
+        font-weight: bold;
+    }
+
+    .team_highlight
+    {
+        font-weight: bold;
+    }
+}
+
+#match_teams
+{
+    border: thin solid #333;
+    font-size: 125%;
+
+    td, th
+    {
+        padding: 0.5ex 1ex;
+    }
+
+    &>thead>th
+    {
+        width: 50%;
+    }
+
+    td
+    {
+        width: 25%;
+    }
+
+    .team_header
+    {
+        border-top: thin solid #333;
+        border-bottom: thin solid #333;
+        text-align: left;
+
+        &>th.red_alliance
+        {
+            background: lighten($red-color, 30%);
+        }
+
+        &>th.blue_alliance
+        {
+            background: lighten($blue-color, 30%);
+        }
+    }
+}
+
+td.red_alliance, th.red_alliance
+{
+    background: $red-color;
+
+    :link, :visited, a:hover
+    {
+        color: inherit;
+    }
+}
+
+td.blue_alliance, th.blue_alliance
+{
+    background: $blue-color;
+
+    :link, :visited, a:hover
+    {
+        color: inherit;
+    }
+}
+
+.formtable th.red_alliance, .formtable th.blue_alliance
+{
+    text-align: left;
+    padding-bottom: 1ex;
+}
+
+#score
+{
+    margin-bottom: 1ex;
+    font-size: 150%;
+}
+
+#main_jumpbar_form
+{
+    input
+    {
+        font-size: 150%;
+    }
+}
+
+h1,h2,span,div
+{
+    &.red_alliance
+    {
+        color: $red-color;
+    }
+
+    &.blue_alliance
+    {
+        color: $blue-color;
+    }
+}
+
+footer
+{
+    background: $content-background;
+    border: thin solid black;
+    text-align: center;
+    font-size: 80%;
+}

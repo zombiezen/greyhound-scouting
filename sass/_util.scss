@@ -1,0 +1,53 @@
+//
+//  _util.scss
+//  Greyhound Lua
+//
+//  Created by Ross Light on 2010-11-29.
+//
+
+@mixin border-radius($topleft, $topright: $topleft, $bottomleft: $topleft, $bottomright: $topright)
+{
+    @if ($topleft == $topright and $topleft == $bottomleft and $topleft == $bottomright)
+    {
+        /* Saf3+, Chrome */
+        -webkit-border-radius: $topleft;
+        /* FF1+ */
+        -moz-border-radius: $topleft;
+        /* Opera 10.5, IE 9 */
+        border-radius: $topleft;
+    }
+    @else
+    {
+        /* Saf3+, Chrome */
+        -webkit-border:
+        {
+            top-left-radius: $topleft;
+            top-right-radius: $topright;
+            bottom-left-radius: $bottomleft;
+            bottom-right-radius: $bottomright;
+        }
+        /* FF1+ */
+        -moz-border-radius:
+        {
+            topleft: $topleft;
+            topright: $topright;
+            bottomleft: $bottomleft;
+            bottomright: $bottomright;
+        }
+        /* Opera 10.5, IE 9 */
+        border:
+        {
+            top-left-radius: $topleft;
+            top-right-radius: $topright;
+            bottom-left-radius: $bottomleft;
+            bottom-right-radius: $bottomright;
+        }
+    }
+}
+
+@mixin box-sizing($style)
+{
+    -webkit-box-sizing: $style;
+    -moz-box-sizing: $style;
+    box-sizing: $style;
+}

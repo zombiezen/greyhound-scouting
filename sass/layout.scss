@@ -1,0 +1,52 @@
+/*
+ *  layout.css
+ *  scouting
+ *
+ *  Created by Ross Light on 1/12/11.
+ */
+
+@import "util";
+
+header
+{
+    position: relative;
+    padding: 1ex 1ex;
+
+    &>h1
+    {
+    }
+
+    &>nav
+    {
+        position: absolute;
+        bottom: 0.5ex;
+        right: 5em;
+    }
+}
+
+@media print
+{
+    header>nav
+    {
+        display: none;
+    }
+}
+
+#main
+{
+    @include box-sizing(border-box);
+
+    position: relative;
+    width: 90%;
+    margin: 1.5em auto;
+    padding: 0 1em 1em;
+}
+
+footer
+{
+    @include box-sizing(border-box);
+
+    width: 50%;
+    margin: 0 auto;
+    padding: 1ex 1em;
+}

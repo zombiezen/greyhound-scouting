@@ -47,6 +47,7 @@ func main() {
 
 	server.Handle("/", server.Handler(index)).Name("root")
 	server.Handle("/jump", server.Handler(index)).Name("jump")
+	server.Handle("/static{path:/.*}", server.Handler(staticFile)).Name("static")
 
 	log.Printf("Listening on %s", *address)
 	http.ListenAndServe(*address, Logger{server})
@@ -57,6 +58,15 @@ func index(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
 		"Server":  server,
 		"Request": req,
 	})
+	return nil
+}
+
+func staticFile(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+	vars := mux.Vars(req)
+	// TODO: Don't do an allocation every time.
+	fs := http.FileServer(server.Static)
+	req.URL.Path = "/" + vars["path"]
+	fs.ServeHTTP(w, req)
 	return nil
 }
 
