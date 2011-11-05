@@ -1,0 +1,67 @@
+{{define "doctype.html"}}<!DOCTYPE html>{{end}}
+
+{{define "css.html"}}
+    {{/* TODO: Add HTML5 shiv */}}
+    <style>article, aside, dialog, figure, footer, header, hgroup, menu, nav, section { display: block; }</style>
+    <!-- CSS -->
+    {{/* TODO: Add CSS */}}
+{{end}}
+
+{{define "jumpbar.html"}}
+    <form id="jumpbar_form" action="{{route "jump"}}" method="GET">
+        <input id="jumpbar" name="q" type="text" size="20">
+        <input type="submit" value="Jump">
+    </form>
+{{end}}
+
+{{define "default-links.html"}}
+    {{/* TODO */}}
+{{end}}
+
+{{define "begin-content.html"}}
+{{end}}
+
+{{define "end-content.html"}}
+{{end}}
+
+{{define "footer.html"}}
+    <footer>
+        <p>Software: Copyright &copy; 2010, 2011 <a href="http://www.zombiezen.com/">Ross Light</a></p>
+        <p>Developed for Team 973: Greyhound Revolutionary Robotics</p>
+    </footer>
+{{end}}
+
+{{define "jquery.html"}}
+    {{/* TODO */}}
+{{end}}
+
+{{define "watermark.html"}}
+<!--
+  /////////////////+oooosssss+////////////////////
+  /////////////+oyhmNNNNNNNNNNmds+////////////////
+  //////////+ohdNmNNNNNNNNNNNNNNNmdo//////////////
+  /////////smNmmmNNNNNNNNNNNNNNNNNNNh+////////////
+  //++++++yNmmmmmmmNmdhdmNmmNNNNNNNNNd////////////
+  +++++++smmmmmmmmmNhhddddmmmmmmmmmNmNs///////////
+  +++++++ymmmmmmdhhyoo+++ooossyhdddNNMs///////////
+  +++++++ymmmmmdysoooo+++++++++oosydmMo///////////
+  +++++++hmmNmdysssssyso+++++++oooosdm+///////////
+  ++++++oymmmdsossssooshhyooooossssshy////////////
+  +++++ohyhmmyooosyyddyyyysooyyyyyyyds////////////
+  +++++ossyssooooooossyssso+oyyddyyyh+////////////
+  +++++ooooosooo+++++++ooo++ossssssys/////////////
+  ++++++ooossooo+++++ooooo++oooooooo//////////////
+  ++++++osysssooooossssyso+++oso++o+//////////////
+  +++++oosssssssosyysoosyhyyyyysooo++/////////////
+  +++ooossyyyssooooyhyyyyyhhhyyssso+++////////////
+  +++sdmNNdsyyssoooosss+++oydyoosso++++///////////
+  oymmmmNNdsyyyysoooossyyyyysooshsoo+++///////////
+  dmmmmmmNhssyhhyso++oosssoooshmNmso++++//////////
+  mmmmmmmmhyssyhhhyo+++++oooymNmmNy++++++/////////
+  mmmmmNNNmhyssyyhhhyssoosydNNNNNmdhyyso++////////
+  mmmmmmNNNNdhssyyhhhhyhhmNNNNNNNNNNNmmmdhs+//////
+  NmmmmmmNNNNmdysyyhhhhdmNNNNNNNNNNNNmmmmmmmy+////
+
+  http://www.zombiezen.com/
+-->
+{{end}}

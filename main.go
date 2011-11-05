@@ -1,20 +1,30 @@
 package main
 
 import (
+	htmltemplate "exp/template/html"
 	"flag"
+	"fmt"
 	"http"
 	"log"
 	"os"
+	"template"
 
 	"launchpad.net/mgo"
 
 	"gorilla.googlecode.com/hg/gorilla/mux"
 )
 
+const templatePrefix = "templates/"
+
+var escapedTemplates = []string{
+	"index.html",
+}
+
 func main() {
 	mongoURL := flag.String("mongo", "localhost", "The URL for the MongoDB instance")
 	database := flag.String("database", "scouting", "The database name in the MongoDB instance to use")
 	address := flag.String("address", ":8080", "The address to listen for connections")
+	staticdir := flag.String("staticdir", "static", "The directory to serve static files from")
 	flag.Parse()
 
 	session, err := mgo.Mongo(*mongoURL)
@@ -22,52 +32,57 @@ func main() {
 		log.Fatalf("Could not connect to database: %v", err)
 	}
 
-	server := &Server{
-		database: session.DB(*database),
-		Debug:    true,
+	server := NewServer(session.DB(*database))
+	server.Static = http.Dir(*staticdir)
+
+	if _, err := server.TemplateSet().ParseGlob(templatePrefix + "sets/*.html"); err != nil {
+		log.Fatalf("Could not load template sets: %v", err)
+	}
+	if _, err := server.TemplateSet().ParseTemplateGlob(templatePrefix + "*.html"); err != nil {
+		log.Fatalf("Could not load templates: %v", err)
+	}
+	if _, err := htmltemplate.EscapeSet(server.TemplateSet(), escapedTemplates...); err != nil {
+		log.Fatalf("Could not autoescape templates: %v", err)
 	}
 
-	mux.Handle("/", server.Handler(hello))
+	server.Handle("/", server.Handler(index)).Name("root")
+	server.Handle("/jump", server.Handler(index)).Name("jump")
 
 	log.Printf("Listening on %s", *address)
-	http.ListenAndServe(*address, Logger{mux.DefaultRouter})
+	http.ListenAndServe(*address, Logger{server})
 }
 
-func hello(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
-	w.Write([]byte("Hello, World!\n"))
+func index(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+	server.TemplateSet().Execute(w, "index.html", map[string]interface{}{
+		"Server":  server,
+		"Request": req,
+	})
 	return nil
 }
 
-type Logger struct {
-	http.Handler
-}
-
-func (logger Logger) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	rec := &responseRecorder{ResponseWriter: w, statusCode: http.StatusOK}
-	logger.Handler.ServeHTTP(rec, req)
-	log.Printf("%s %s %d %d", req.Method, req.URL.Path, rec.statusCode, rec.size)
-}
-
-type responseRecorder struct {
-	http.ResponseWriter
-	statusCode int
-	size int64
-}
-
-func (rec *responseRecorder) WriteHeader(statusCode int) {
-	rec.ResponseWriter.WriteHeader(statusCode)
-	rec.statusCode = statusCode
-}
-
-func (rec *responseRecorder) Write(p []byte) (n int, err os.Error) {
-	n, err = rec.ResponseWriter.Write(p)
-	rec.size += int64(n)
-	return
-}
-
 type Server struct {
-	database mgo.Database
-	Debug    bool
+	*mux.Router
+	database  mgo.Database
+	templates *template.Set
+	Debug     bool
+	Static http.FileSystem
+}
+
+func NewServer(db mgo.Database) *Server {
+	server := &Server{
+		Router:    new(mux.Router),
+		database:  db,
+		templates: new(template.Set),
+		Debug:     true,
+	}
+	server.templates.Funcs(template.FuncMap{
+		"route": server.routeFunc(),
+	})
+	return server
+}
+
+func (server *Server) TemplateSet() *template.Set {
+	return server.templates
 }
 
 func (server *Server) Session() *mgo.Session {
@@ -91,4 +106,46 @@ func (server *Server) Handler(f func(*Server, http.ResponseWriter, *http.Request
 			}
 		}
 	})
+}
+
+func (server *Server) routeFunc() func (string, ...string) (htmltemplate.URL, os.Error) {
+	return func(name string, pairs ...string) (htmltemplate.URL, os.Error) {
+		route, ok := server.NamedRoutes[name]
+		if !ok {
+			return "", fmt.Errorf("Could not resolve route %q", name)
+		}
+		url := route.URL(pairs...)
+		if url == nil {
+			return "", fmt.Errorf("Bad set of pairs for route %q: %v", name, pairs)
+		}
+		return htmltemplate.URL(url.String()), nil
+	}
+}
+
+type Logger struct {
+	http.Handler
+}
+
+func (logger Logger) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	method, path := req.Method, req.URL.Path
+	rec := &responseRecorder{ResponseWriter: w, statusCode: http.StatusOK}
+	logger.Handler.ServeHTTP(rec, req)
+	log.Printf("%s %s %d %d", method, path, rec.statusCode, rec.size)
+}
+
+type responseRecorder struct {
+	http.ResponseWriter
+	statusCode int
+	size       int64
+}
+
+func (rec *responseRecorder) WriteHeader(statusCode int) {
+	rec.ResponseWriter.WriteHeader(statusCode)
+	rec.statusCode = statusCode
+}
+
+func (rec *responseRecorder) Write(p []byte) (n int, err os.Error) {
+	n, err = rec.ResponseWriter.Write(p)
+	rec.size += int64(n)
+	return
 }

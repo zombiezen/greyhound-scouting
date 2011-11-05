@@ -1,0 +1,38 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    <title>Home</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            <h1>Home</h1>
+            <div class="copy">
+                <p>Welcome to the Greyhound Scouting database.</p>
+                <form id="main_jumpbar_form" action="{{route "jump"}}" method="GET">
+                    <p>
+                        <input id="main_jumpbar" name="q" size="40" type="text"{{with .Query}} value="{{.}}"{{end}} autofocus>
+                        <input type="submit" value="Go">
+                    </p>
+                </form>
+            </div>
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>
