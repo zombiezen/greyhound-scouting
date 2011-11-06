@@ -17,6 +17,8 @@ const templatePrefix = "templates/"
 var escapedTemplates = []string{
 	"index.html",
 	"team.html",
+	"team-index.html",
+	"error-debug.html",
 }
 
 func main() {
@@ -38,6 +40,9 @@ func main() {
 	}
 	if _, err := server.TemplateSet().ParseTemplateGlob(templatePrefix + "*.html"); err != nil {
 		log.Fatalf("Could not load templates: %v", err)
+	}
+	if _, err := server.TemplateSet().ParseTemplateFiles(templatePrefix + "gopher"); err != nil {
+		log.Fatalf("Could not load gopher: %v", err)
 	}
 	if _, err := htmltemplate.EscapeSet(server.TemplateSet(), escapedTemplates...); err != nil {
 		log.Fatalf("Could not autoescape templates: %v", err)

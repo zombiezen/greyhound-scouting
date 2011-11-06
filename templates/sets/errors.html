@@ -1,0 +1,99 @@
+{{define "error-debug.html"}}
+<!DOCTYPE html>
+<html>
+<html>
+<head>
+    <title>Server Error</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <style type="text/css">
+        body {
+            background-repeat: no-repeat;
+            background-position: left 1em;
+            background-image: url({{template "gopher"}});
+        }
+
+        #main {
+            width: 90%;
+            margin-left: 70px;
+            padding: 0 1ex 1em;
+
+            background: white;
+            background: rgba(100%, 100%, 100%, 0.5);
+
+            border: thin solid gray;
+            -webkit-border-radius: 12px;
+            -moz-border-radius: 12px;
+            border-radius: 12px;
+
+            -moz-background-clip: padding;
+            -webkit-background-clip: padding-box;
+            background-clip: padding-box;
+        }
+
+        #errorMessage {
+            width: 55%;
+            margin-left: 1em;
+            padding: 0 1ex;
+
+            background: #EB9197;
+            font-family: "Ubuntu Mono", "Courier New", "Courier", monospace;
+        }
+
+        th {
+            text-align: right;
+            padding-right: 1em;
+        }
+
+        tt {
+            font-family: "Ubuntu Mono", "Courier New", "Courier", monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="main">
+        <h1>Don't Panic!</h1>
+        <p>You requested <tt>{{.Request.Method}} {{.Request.URL.Path}}</tt>. After some digging around, the gophers found a problem.  Gopher says:</p>
+        <p id="errorMessage">{{.Error}}</p>
+        <p>If none of this makes sense to you, don't panic!  Contact the scouting administrator (he or she will already have the information on this page).  In the mean time, hit the back button and try to proceed as normal.</p>
+
+        <h2>Headers</h2>
+        <table id="headers">
+            {{range $name, $values := .Request.Header}}
+                {{range .}}
+                    <tr>
+                        <th>{{$name}}</th>
+                        <td><tt>{{.}}</tt></td>
+                    </tr>
+                {{end}}
+            {{end}}
+        </table>
+
+        {{with .Request.Form}}
+            <h2>Form Values</h2>
+            <table id="formValues">
+                {{range $name, $values := .}}
+                    {{range .}}
+                        <tr>
+                            <th>{{$name}}</th>
+                            <td><tt>{{.}}</tt></td>
+                        </tr>
+                    {{end}}
+                {{end}}
+            </table>
+        {{end}}
+
+        {{with .Variables}}
+            <h2>Variables</h2>
+            <table id="variables">
+                {{range $name, $value := .}}
+                <tr>
+                    <th>{{$name}}</th>
+                    <td><tt>{{$value}}</tt></td>
+                </tr>
+                {{end}}
+            </table>
+        {{end}}
+    </div>
+</body>
+</html>
+{{end}}

@@ -55,8 +55,30 @@ func (server *Server) Handler(f ServerHandlerFunc) http.Handler {
 	return serverHandler{server, f}
 }
 
-func (server *Server) logError(method, path string, err os.Error) {
-	log.Printf("ERROR %s %s: %v", method, path, err)
+func (server *Server) logError(req *http.Request, err os.Error) {
+	var b bytes.Buffer
+	fmt.Fprintf(&b, "ERROR %s %s\n", req.Method, req.URL.Path)
+	fmt.Fprintf(&b, "\tMessage:\n\t\t%v\n", err)
+
+	fmt.Fprint(&b, "\tHeaders:\n")
+	for k, vv := range req.Header {
+		for _, v := range vv {
+			fmt.Fprintf(&b, "\t\t%s: %v\n", k, v)
+		}
+	}
+
+	if server.Debug {
+		req.ParseForm()
+	}
+	if req.Form != nil {
+		fmt.Fprint(&b, "\tForm:\n")
+		for k, vv := range req.Form {
+			for _, v := range vv {
+				fmt.Fprintf(&b, "\t\t%s: %v\n", k, v)
+			}
+		}
+	}
+	log.Print(&b)
 }
 
 func (server *Server) routeFunc() func(string, ...string) (htmltemplate.URL, os.Error) {
@@ -80,19 +102,26 @@ type serverHandler struct {
 }
 
 func (handler serverHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	method, path := req.Method, req.URL.Path
 	buf := new(ResponseBuffer)
 	err := handler.handle(handler.server, buf, req)
+
 	if err == nil {
 		w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
 		buf.Flush(w)
 	} else {
-		handler.server.logError(method, path, err)
+		handler.server.logError(req, err)
 
-		// TODO: Output is ugly.
 		if handler.server.Debug {
-			http.Error(w, err.String(), http.StatusInternalServerError)
+			req.ParseForm()
+			w.WriteHeader(http.StatusInternalServerError)
+			handler.server.TemplateSet().Execute(w, "error-debug.html", map[string]interface{}{
+				"Server":    handler.server,
+				"Error":     err,
+				"Request":   req,
+				"Variables": mux.Vars(req),
+			})
 		} else {
+			// TODO: Output is ugly.
 			http.Error(w, "Server error encountered", http.StatusInternalServerError)
 		}
 	}
