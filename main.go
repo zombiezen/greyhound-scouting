@@ -6,6 +6,7 @@ import (
 	"http"
 	"log"
 	"os"
+	"strconv"
 
 	"launchpad.net/mgo"
 
@@ -52,7 +53,7 @@ func main() {
 	}
 
 	server.Handle("/", server.Handler(index)).Name("root")
-	server.Handle("/jump", server.Handler(index)).Name("jump")
+	server.Handle("/jump", server.Handler(jump)).Name("jump")
 
 	server.Handle("/team/", server.Handler(teamIndex)).Name("team.index").RedirectSlash(true)
 	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view").RedirectSlash(true)
@@ -72,5 +73,24 @@ func index(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
 	return server.TemplateSet().Execute(w, "index.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
+	})
+}
+
+func jump(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+	query := req.FormValue("q")
+	log.Printf("Jump %q", query)
+	if query != "" {
+		if _, err := strconv.Atoi(query); err == nil {
+			// Team number
+			http.Redirect(w, req, server.NamedRoutes["team.view"].URL("number", query).String(), http.StatusFound)
+			return nil
+		}
+
+		// TODO: other tags
+	}
+	return server.TemplateSet().Execute(w, "jump.html", map[string]interface{}{
+		"Server":  server,
+		"Request": req,
+		"Query":   query,
 	})
 }

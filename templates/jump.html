@@ -1,0 +1,59 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    <title>Jump</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        {{template "logo.html"}}
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            <h1>Jump</h1>
+
+            {{if .Query}}
+            <p class="error">The query you entered is invalid.  Check your code and try again.</p>
+            {{end}}
+
+            <form id="main_jumpbar_form" action="{{route "jump"}}" method="GET">
+                <p>
+                    <input id="main_jumpbar" name="q" size="40" type="text"{{with .Query}} value="{{.}}"{{end}} autofocus>
+                    <input type="submit" value="Go">
+                </p>
+            </form>
+
+            <h2>What is this?</h2>
+            <div class="copy">
+                <p>The jump bar allows you to quickly move to different parts of the database.  Its main use is for scanning barcodes, but you can also type queries in manually.</p>
+                <dl>
+                    <dt>973</dt>
+                    <dd>Team Lookup</dd>
+
+                    <dt>ca2011</dt>
+                    <dd>Event</dd>
+
+                    <dt>ca20112001</dt>
+                    <dd>Match page.  The prefix is the event code, the next digit is the match type, and then the next three digits are the match number.</dd>
+
+                    <dt>ca20112001973</dt>
+                    <dd>Edit match info for a particular team. (This is mostly useful for scouting forms.)</dd>
+                </dl>
+            </div>
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>
