@@ -1,4 +1,8 @@
 ^scouting$
+^_testmain\.go$
 ^static/css/.*\.css$
 syntax:glob
+6.out
+*.[oa]
+*.[586]
 .sass-cache

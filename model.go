@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"launchpad.net/gobson/bson"
 )
 
@@ -44,20 +43,6 @@ func (t MatchType) DisplayName() string {
 	return string(t)
 }
 
-func (t MatchType) Number() int {
-	switch t {
-	case Qualification:
-		return 0
-	case QuarterFinal:
-		return 1
-	case SemiFinal:
-		return 2
-	case Final:
-		return 3
-	}
-	return -1
-}
-
 type Event struct {
 	Location struct {
 		Name string
@@ -72,8 +57,11 @@ type Event struct {
 	Teams    []int
 }
 
-func (event *Event) Tag() string {
-	return fmt.Sprintf("%s%04d", event.Location.Code, event.Date.Year)
+func (event *Event) Tag() EventTag {
+	return EventTag{
+		LocationCode: event.Location.Code,
+		Year:         uint(event.Date.Year),
+	}
 }
 
 type Alliance string
@@ -91,14 +79,6 @@ type Match struct {
 	Teams []TeamInfo
 	Score map[Alliance]int `bson:",omitempty"`
 	Type  MatchType
-}
-
-func MatchTag(event *Event, match *Match, matchNum int) string {
-	return fmt.Sprintf("%s%d%03d", event.Tag(), match.Type.Number(), matchNum)
-}
-
-func MatchTeamTag(event *Event, match *Match, matchNum int, teamNum int) string {
-	return MatchTag(event, match, matchNum) + fmt.Sprint(teamNum)
 }
 
 type TeamInfo struct {
