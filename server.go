@@ -121,8 +121,12 @@ func (handler serverHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 				"Variables": mux.Vars(req),
 			})
 		} else {
-			// TODO: Output is ugly.
-			http.Error(w, "Server error encountered", http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
+			handler.server.TemplateSet().Execute(w, "error.html", map[string]interface{}{
+				"Server":    handler.server,
+				"Error":     err,
+				"Request":   req,
+			})
 		}
 	}
 }

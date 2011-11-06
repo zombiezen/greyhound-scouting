@@ -18,6 +18,7 @@ var escapedTemplates = []string{
 	"index.html",
 	"team.html",
 	"team-index.html",
+	"error.html",
 	"error-debug.html",
 }
 
@@ -26,6 +27,7 @@ func main() {
 	database := flag.String("database", "scouting", "The database name in the MongoDB instance to use")
 	address := flag.String("address", ":8080", "The address to listen for connections")
 	staticdir := flag.String("staticdir", "static", "The directory to serve static files from")
+	debug := flag.Bool("debug", false, "Display extra information in-browser about the program")
 	flag.Parse()
 
 	session, err := mgo.Mongo(*mongoURL)
@@ -34,6 +36,7 @@ func main() {
 	}
 
 	server := NewServer(session.DB(*database))
+	server.Debug = *debug
 
 	if _, err := server.TemplateSet().ParseGlob(templatePrefix + "sets/*.html"); err != nil {
 		log.Fatalf("Could not load template sets: %v", err)
