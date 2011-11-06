@@ -8,6 +8,7 @@ type Team struct {
 	Number     int
 	Name       string
 	RookieYear int `bson:"rookie_year"`
+	Robot      *Robot
 }
 
 type Robot struct {

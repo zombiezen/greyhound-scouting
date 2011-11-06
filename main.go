@@ -16,6 +16,7 @@ const templatePrefix = "templates/"
 
 var escapedTemplates = []string{
 	"index.html",
+	"team.html",
 }
 
 func main() {
@@ -46,6 +47,7 @@ func main() {
 	server.Handle("/", server.Handler(index)).Name("root")
 	server.Handle("/jump", server.Handler(index)).Name("jump")
 	server.Handle("/static{path:/.*}", server.Handler(staticFile)).Name("static")
+	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view")
 
 	log.Printf("Listening on %s", *address)
 	http.ListenAndServe(*address, Logger{server})

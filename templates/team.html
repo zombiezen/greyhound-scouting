@@ -1,0 +1,69 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    <title>Team {{.Team.Number}}</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        {{template "logo.html"}}
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+                {{/* TODO: edit link */}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            <hgroup>
+                <h1>Team #{{.Team.Number}}</h1>
+                {{with .Team.Name}}<h2>{{.}}</h2>{{end}}
+            </hgroup>
+            {{with .Team.RookieYear}}
+            <table class="info">
+                <tr><th>Rookie Year</th><td>{{.}}</td></tr>
+            </table>
+            {{end}}
+
+            {{with .Team.Robot}}
+            {{if or .Name .Image .Notes}}
+            <section id="robot_info">
+                <h2 id="robot">Robot Info</h2>
+
+                {{/* TODO: Image */}}
+
+                <table class="info">
+                    {{with .Name}}<tr><th>Name</th><td>{{.}}</td></tr>{{end}}
+                    {{with .Notes}}<tr><th>Notes</th><td>{{.}}</td></tr>{{end}}
+                </table>
+            </section>
+            {{end}}
+            {{end}}
+
+            {{/* TODO: Registered Events */}}
+
+            {{/* TODO: Overall Statistics */}}
+
+            <h2>Links</h2>
+
+            <div id="copy">
+                <ul>
+                    {{with .Team.Number}}
+                    <li><a href="http://frclinks.appspot.com/team/{{.}}">FRC Info</a></li>
+                    <li><a href="http://frclinks.appspot.com/tba/{{.}}">The Blue Alliance</a></li>
+                    {{end}}
+                </ul>
+            </div>
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>
