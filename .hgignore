@@ -2,7 +2,7 @@
 ^_testmain\.go$
 ^static/css/.*\.css$
 syntax:glob
-6.out
 *.[oa]
 *.[586]
+[586].out
 .sass-cache
