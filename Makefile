@@ -4,6 +4,7 @@ TARG=scouting
 GOFILES=\
 	main.go\
 	model.go\
+	paging.go\
 	server.go\
 	tags.go\
 	team.go\
