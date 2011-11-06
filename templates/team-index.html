@@ -1,0 +1,47 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    <title>Team Index</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        {{template "logo.html"}}
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+                {{/* TODO: create link */}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            <h1>Team Index</h1>
+
+            <table id="team_index" class="team_list listing">
+                {{template "teamlist.html" .TeamList}}
+            </table>
+
+            {{with .Page}}
+            <nav class="pager">
+                Page {{.Number}} of {{.NPage}}
+                {{if or .HasPrevious .HasNext}}
+                <div class="control">
+                    {{if .HasPrevious}}<a href="?page={{.PreviousNumber}}">Previous</a>{{end}}
+                    {{if .HasNext}}<a href="?page={{.NextNumber}}">Next</a>{{end}}
+                </div>
+                {{end}}
+            </nav>
+            {{end}}
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>

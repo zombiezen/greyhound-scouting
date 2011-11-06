@@ -68,6 +68,14 @@ func (page Page) HasPrevious() bool {
 	return page.Number() > 1
 }
 
+func (page Page) NextNumber() int {
+	return page.Number() + 1
+}
+
+func (page Page) PreviousNumber() int {
+	return page.Number() - 1
+}
+
 // Get fetches all of the objects on the page.
 func (page Page) Get(i interface{}) os.Error {
 	return page.Pager.Offset(page.Index * page.PerPage).Limit(page.PerPage).All(i)

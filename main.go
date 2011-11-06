@@ -47,7 +47,8 @@ func main() {
 	server.Handle("/", server.Handler(index)).Name("root")
 	server.Handle("/jump", server.Handler(index)).Name("jump")
 	server.Handle("/static{path:/.*}", server.Handler(staticFile)).Name("static")
-	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view")
+	server.Handle("/team/", server.Handler(teamIndex)).Name("team.index").RedirectSlash(true)
+	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view").RedirectSlash(true)
 
 	log.Printf("Listening on %s", *address)
 	http.ListenAndServe(*address, Logger{server})

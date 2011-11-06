@@ -1,0 +1,23 @@
+<thead>
+    <tr>
+        <th class="team_number" scope="col">#</th>
+        <th class="team_name" scope="col">Name</th>
+        <th class="robot_name" scope="col">Robot Name</th>
+    </tr>
+</thead>
+<tbody>
+    {{range $i, $team := .}}
+    <tr class="{{cycle $i "odd" "even"}}">
+        {{with $teamURL = print .Number | route "team.view" "number"}}
+        <td class="team_number">{{with $team.Number}}<a href="{{$teamURL}}">{{.}}</a>{{end}}</td>
+        <td class="team_name">{{with $team.Name}}<a href="{{$teamURL}}">{{.}}</a>{{end}}</td>
+        {{with $team.Robot}}
+            <td class="robot_name">{{with .Name}}<a href="{{$teamURL}}">{{.}}</a>{{end}}</td>
+        {{else}}
+            <td class="robot_name"></td>
+        {{end}}
+        {{end}}
+    </tr>
+    {{end}}
+</tbody>
+

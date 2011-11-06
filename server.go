@@ -30,6 +30,9 @@ func NewServer(db mgo.Database) *Server {
 	}
 	server.templates.Funcs(template.FuncMap{
 		"route": server.routeFunc(),
+		"cycle": func(i int, vals ...interface{}) interface{} {
+			return vals[i % len(vals)]
+		},
 	})
 	return server
 }
