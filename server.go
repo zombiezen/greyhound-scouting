@@ -123,9 +123,9 @@ func (handler serverHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 			handler.server.TemplateSet().Execute(w, "error.html", map[string]interface{}{
-				"Server":    handler.server,
-				"Error":     err,
-				"Request":   req,
+				"Server":  handler.server,
+				"Error":   err,
+				"Request": req,
 			})
 		}
 	}
