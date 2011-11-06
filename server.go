@@ -1,16 +1,17 @@
 package main
 
 import (
+	"bytes"
 	htmltemplate "exp/template/html"
 	"fmt"
+	"gorilla.googlecode.com/hg/gorilla/mux"
 	"http"
+	"io"
+	"launchpad.net/mgo"
 	"log"
 	"os"
+	"strconv"
 	"template"
-
-	"launchpad.net/mgo"
-
-	"gorilla.googlecode.com/hg/gorilla/mux"
 )
 
 type Server struct {
@@ -18,7 +19,6 @@ type Server struct {
 	database  mgo.Database
 	templates *template.Set
 	Debug     bool
-	Static    http.FileSystem
 }
 
 func NewServer(db mgo.Database) *Server {
@@ -31,7 +31,7 @@ func NewServer(db mgo.Database) *Server {
 	server.templates.Funcs(template.FuncMap{
 		"route": server.routeFunc(),
 		"cycle": func(i int, vals ...interface{}) interface{} {
-			return vals[i % len(vals)]
+			return vals[i%len(vals)]
 		},
 	})
 	return server
@@ -49,19 +49,14 @@ func (server *Server) DB() mgo.Database {
 	return server.database
 }
 
-func (server *Server) Handler(f func(*Server, http.ResponseWriter, *http.Request) os.Error) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		// TODO: This can be prettier.
-		err := f(server, w, req)
-		if err != nil {
-			log.Printf("ERROR %s %s: %v", req.Method, req.URL.Path, err)
-			if server.Debug {
-				http.Error(w, err.String(), 500)
-			} else {
-				http.Error(w, "Server error encountered", 500)
-			}
-		}
-	})
+type ServerHandlerFunc func(*Server, http.ResponseWriter, *http.Request) os.Error
+
+func (server *Server) Handler(f ServerHandlerFunc) http.Handler {
+	return serverHandler{server, f}
+}
+
+func (server *Server) logError(method, path string, err os.Error) {
+	log.Printf("ERROR %s %s: %v", method, path, err)
 }
 
 func (server *Server) routeFunc() func(string, ...string) (htmltemplate.URL, os.Error) {
@@ -78,6 +73,81 @@ func (server *Server) routeFunc() func(string, ...string) (htmltemplate.URL, os.
 	}
 }
 
+// A serverHandler wraps a ServerHandlerFunc to implement the http.Handler interface.
+type serverHandler struct {
+	server *Server
+	handle ServerHandlerFunc
+}
+
+func (handler serverHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	method, path := req.Method, req.URL.Path
+	buf := new(ResponseBuffer)
+	err := handler.handle(handler.server, buf, req)
+	if err == nil {
+		w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
+		buf.Flush(w)
+	} else {
+		handler.server.logError(method, path, err)
+
+		// TODO: Output is ugly.
+		if handler.server.Debug {
+			http.Error(w, err.String(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "Server error encountered", http.StatusInternalServerError)
+		}
+	}
+}
+
+// A ResponseBuffer stores an entire request in memory.  The zero value is an empty response.
+type ResponseBuffer struct {
+	bytes.Buffer
+	code   int
+	header http.Header
+	sent   http.Header
+}
+
+func (buffer *ResponseBuffer) StatusCode() int {
+	return buffer.code
+}
+
+func (buffer *ResponseBuffer) HeaderSent() http.Header {
+	return buffer.sent
+}
+
+func (buffer *ResponseBuffer) Flush(w http.ResponseWriter) os.Error {
+	for k, v := range buffer.sent {
+		w.Header()[k] = v
+	}
+	w.WriteHeader(buffer.code)
+	_, err := io.Copy(w, buffer)
+	return err
+}
+
+func (buffer *ResponseBuffer) Header() http.Header {
+	if buffer.header == nil {
+		buffer.header = make(http.Header)
+	}
+	return buffer.header
+}
+
+func (buffer *ResponseBuffer) WriteHeader(code int) {
+	if buffer.sent == nil {
+		buffer.code = code
+		buffer.sent = make(http.Header, len(buffer.header))
+		for k, v := range buffer.header {
+			v2 := make([]string, len(v))
+			copy(v2, v)
+			buffer.sent[k] = v2
+		}
+	}
+}
+
+func (buffer *ResponseBuffer) Write(p []byte) (int, os.Error) {
+	buffer.WriteHeader(http.StatusOK)
+	return buffer.Buffer.Write(p)
+}
+
+// A Logger logs all HTTP requests sent to a handler.
 type Logger struct {
 	http.Handler
 }

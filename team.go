@@ -39,13 +39,12 @@ func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 	}
 
 	// Render page
-	server.TemplateSet().Execute(w, "team-index.html", map[string]interface{}{
+	return server.TemplateSet().Execute(w, "team-index.html", map[string]interface{}{
 		"Server":   server,
 		"Request":  req,
 		"TeamList": teamList,
 		"Page":     page,
 	})
-	return nil
 }
 
 func viewTeam(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
@@ -65,10 +64,9 @@ func viewTeam(server *Server, w http.ResponseWriter, req *http.Request) os.Error
 	// TODO: stats
 	// TODO: image
 
-	server.TemplateSet().Execute(w, "team.html", map[string]interface{}{
+	return server.TemplateSet().Execute(w, "team.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
 		"Team":    team,
 	})
-	return nil
 }

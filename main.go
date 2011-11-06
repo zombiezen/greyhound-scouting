@@ -32,7 +32,6 @@ func main() {
 	}
 
 	server := NewServer(session.DB(*database))
-	server.Static = http.Dir(*staticdir)
 
 	if _, err := server.TemplateSet().ParseGlob(templatePrefix + "sets/*.html"); err != nil {
 		log.Fatalf("Could not load template sets: %v", err)
@@ -46,27 +45,24 @@ func main() {
 
 	server.Handle("/", server.Handler(index)).Name("root")
 	server.Handle("/jump", server.Handler(index)).Name("jump")
-	server.Handle("/static{path:/.*}", server.Handler(staticFile)).Name("static")
+
 	server.Handle("/team/", server.Handler(teamIndex)).Name("team.index").RedirectSlash(true)
 	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view").RedirectSlash(true)
+
+	staticServer := http.FileServer(http.Dir(*staticdir))
+	server.HandleFunc("/static{path:/.*}", func(w http.ResponseWriter, req *http.Request) {
+		vars := mux.Vars(req)
+		req.URL.Path = "/" + vars["path"]
+		staticServer.ServeHTTP(w, req)
+	}).Name("static")
 
 	log.Printf("Listening on %s", *address)
 	http.ListenAndServe(*address, Logger{server})
 }
 
 func index(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
-	server.TemplateSet().Execute(w, "index.html", map[string]interface{}{
+	return server.TemplateSet().Execute(w, "index.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
 	})
-	return nil
-}
-
-func staticFile(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
-	vars := mux.Vars(req)
-	// TODO: Don't do an allocation every time.
-	fs := http.FileServer(server.Static)
-	req.URL.Path = "/" + vars["path"]
-	fs.ServeHTTP(w, req)
-	return nil
 }
