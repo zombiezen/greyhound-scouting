@@ -5,6 +5,7 @@ GOFILES=\
 	main.go\
 	model.go\
 	paging.go\
+	reports.go\
 	server.go\
 	tags.go\
 	team.go\
