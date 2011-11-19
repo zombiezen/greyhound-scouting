@@ -29,17 +29,16 @@ func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight float32, 
 
 	var canvas *pdf.Canvas
 	for _, match := range matches {
-		if canvas == nil {
-			canvas = doc.NewPage(pageWidth, pageHeight)
-			canvas.Translate(reportMargin, pageHeight-pageHeight/scoutFormsPerPage-reportMargin)
-		}
-
 		// Retrieve the list of teams (in sorted order, red first, then blue)
 		teamList := make([]TeamInfo, 0, len(match.Teams))
 		teamList = append(teamList, match.AllianceInfo(Red).Teams...)
 		teamList = append(teamList, match.AllianceInfo(Blue).Teams...)
 
 		for _, info := range teamList {
+			if canvas == nil {
+				canvas = doc.NewPage(pageWidth, pageHeight)
+				canvas.Translate(reportMargin, pageHeight-pageHeight/scoutFormsPerPage-reportMargin)
+			}
 			renderScoutForm(canvas, sizeX, sizeY, event, match, info.Team)
 			if n%scoutFormsPerPage == scoutFormsPerPage-1 {
 				canvas.Close()

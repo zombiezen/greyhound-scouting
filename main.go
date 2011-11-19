@@ -26,6 +26,8 @@ var escapedTemplates = []string{
 	"error-debug.html",
 }
 
+const eventURLPrefix = "/event/{year:[1-9][0-9]*}/{location:[a-z]+}/"
+
 func main() {
 	mongoURL := flag.String("mongo", "localhost", "The URL for the MongoDB instance")
 	database := flag.String("database", "scouting", "The database name in the MongoDB instance to use")
@@ -62,7 +64,8 @@ func main() {
 	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view").RedirectSlash(true)
 
 	server.Handle("/event/", server.Handler(eventIndex)).Name("event.index").RedirectSlash(true)
-	server.Handle("/event/{year:[1-9][0-9]*}/{location:[a-z]+}/", server.Handler(viewEvent)).Name("event.view").RedirectSlash(true)
+	server.Handle(eventURLPrefix, server.Handler(viewEvent)).Name("event.view").RedirectSlash(true)
+	server.Handle(eventURLPrefix+"scout-forms.pdf", server.Handler(eventScoutForms)).Name("event.scoutForms")
 
 	staticServer := http.FileServer(http.Dir(*staticdir))
 	server.HandleFunc("/static{path:/.*}", func(w http.ResponseWriter, req *http.Request) {

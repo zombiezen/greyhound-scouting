@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"bitbucket.org/zombiezen/gopdf/pdf"
+
 	"gorilla.googlecode.com/hg/gorilla/mux"
 )
 
@@ -66,4 +68,28 @@ func viewEvent(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 		"Matches": matches,
 		"Teams":   teams,
 	})
+}
+
+func eventScoutForms(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+	vars := mux.Vars(req)
+
+	// Fetch event
+	event, err := server.Store().FetchEvent(routeEventTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Fetch matches
+	matches, err := server.Store().FetchMatches(event.Tag())
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	doc := pdf.New()
+	renderMultipleScoutForms(doc, pdf.USLetterWidth, pdf.USLetterHeight, event, matches)
+	return doc.Encode(w)
 }
