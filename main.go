@@ -92,6 +92,15 @@ func jump(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
 			return nil
 		}
 
+		if eventTag, err := ParseEventTag(query); err == nil {
+			// Event
+			http.Redirect(w, req, server.NamedRoutes["event.view"].URL(
+				"year", strconv.Uitoa(eventTag.Year),
+				"location", eventTag.LocationCode,
+			).String(), http.StatusFound)
+			return nil
+		}
+
 		// TODO: other tags
 	}
 	return server.TemplateSet().Execute(w, "jump.html", map[string]interface{}{
