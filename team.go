@@ -5,9 +5,6 @@ import (
 	"os"
 	"strconv"
 
-	"launchpad.net/mgo"
-	"launchpad.net/gobson/bson"
-
 	"gorilla.googlecode.com/hg/gorilla/mux"
 )
 
@@ -18,11 +15,8 @@ func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 		pageNumber = 1
 	}
 
-	// Query for teams
-	teams := server.DB().C("teams").Find(nil).Sort(bson.D{{"_id", 1}})
-
 	// Paginate teams
-	p, err := NewPaginator(MongoPager{teams}, 50)
+	p, err := NewPaginator(server.Store().Teams(), 50)
 	if err != nil {
 		return err
 	}
@@ -52,9 +46,8 @@ func viewTeam(server *Server, w http.ResponseWriter, req *http.Request) os.Error
 	number, _ := strconv.Atoi(vars["number"])
 
 	// Fetch team
-	var team Team
-	err := server.DB().C("teams").Find(bson.M{"_id": number}).One(&team)
-	if err == mgo.NotFound {
+	team, err := server.Store().FetchTeam(number)
+	if err == StoreNotFound {
 		http.NotFound(w, req)
 		return nil
 	} else if err != nil {

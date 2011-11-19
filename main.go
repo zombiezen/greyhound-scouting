@@ -36,7 +36,7 @@ func main() {
 		log.Fatalf("Could not connect to database: %v", err)
 	}
 
-	server := NewServer(session.DB(*database))
+	server := NewServer(mongoDatastore{session.DB(*database)})
 	server.Debug = *debug
 
 	if _, err := server.TemplateSet().ParseGlob(templatePrefix + "sets/*.html"); err != nil {

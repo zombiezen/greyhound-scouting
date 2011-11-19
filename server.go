@@ -7,7 +7,6 @@ import (
 	"gorilla.googlecode.com/hg/gorilla/mux"
 	"http"
 	"io"
-	"launchpad.net/mgo"
 	"log"
 	"os"
 	"strconv"
@@ -16,15 +15,15 @@ import (
 
 type Server struct {
 	*mux.Router
-	database  mgo.Database
+	datastore Datastore
 	templates *template.Set
 	Debug     bool
 }
 
-func NewServer(db mgo.Database) *Server {
+func NewServer(store Datastore) *Server {
 	server := &Server{
 		Router:    new(mux.Router),
-		database:  db,
+		datastore: store,
 		templates: new(template.Set),
 		Debug:     true,
 	}
@@ -41,12 +40,8 @@ func (server *Server) TemplateSet() *template.Set {
 	return server.templates
 }
 
-func (server *Server) Session() *mgo.Session {
-	return server.database.Session
-}
-
-func (server *Server) DB() mgo.Database {
-	return server.database
+func (server *Server) Store() Datastore {
+	return server.datastore
 }
 
 type ServerHandlerFunc func(*Server, http.ResponseWriter, *http.Request) os.Error

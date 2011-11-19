@@ -4,14 +4,11 @@ import (
 	"http"
 	"os"
 	"time"
-
-	"launchpad.net/gobson/bson"
 )
 
 func eventIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
 	// Query for events
-	currentSeason := time.LocalTime().Year
-	events := server.DB().C("events").Find(bson.M{"date.year": currentSeason}).Sort(bson.D{{"date.month", 1}, {"date.day", 1}})
+	events := server.Store().Events(int(time.LocalTime().Year))
 
 	// Fetch events
 	var eventList []Event

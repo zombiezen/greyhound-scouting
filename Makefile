@@ -8,6 +8,7 @@ GOFILES=\
 	paging.go\
 	reports.go\
 	server.go\
+	store.go\
 	tags.go\
 	team.go\
 

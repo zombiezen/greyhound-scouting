@@ -1,11 +1,7 @@
 package main
 
 import (
-	"os"
 	"sort"
-
-	"launchpad.net/mgo"
-	"launchpad.net/gobson/bson"
 )
 
 type Team struct {
@@ -46,6 +42,24 @@ func (t MatchType) DisplayName() string {
 		return "Final"
 	}
 	return string(t)
+}
+
+func (t1 MatchType) Less(t2 MatchType) bool {
+	return t1.key() < t2.key()
+}
+
+func (t MatchType) key() int {
+	switch t {
+	case Qualification:
+		return 0
+	case QuarterFinal:
+		return 1
+	case SemiFinal:
+		return 2
+	case Final:
+		return 3
+	}
+	return -1
 }
 
 type Event struct {
@@ -96,6 +110,43 @@ type Match struct {
 	Score  map[Alliance]int `bson:",omitempty"`
 }
 
+func (match *Match) Alliance(alliance Alliance) []TeamInfo {
+	teams := make([]TeamInfo, 0, len(match.Teams)/2)
+	for _, info := range match.Teams {
+		if info.Alliance == alliance {
+			teams = append(teams, info)
+		}
+	}
+	sort.Sort(byTeamNumber(teams))
+	return teams
+}
+
+type byMatchOrder []*Match
+
+func (slice byMatchOrder) Len() int {
+	return len(slice)
+}
+
+func (slice byMatchOrder) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
+
+func (slice byMatchOrder) Less(i, j int) bool {
+	if slice[i].Type.Less(slice[j].Type) {
+		return true
+	}
+	return slice[i].Number < slice[j].Number
+}
+
+type TeamInfo struct {
+	Team      int
+	Alliance  Alliance
+	Score     int
+	ScoutName string `bson:"scout"`
+	Failure   bool
+	NoShow    bool
+}
+
 type byTeamNumber []TeamInfo
 
 func (slice byTeamNumber) Len() int {
@@ -108,42 +159,4 @@ func (slice byTeamNumber) Swap(i, j int) {
 
 func (slice byTeamNumber) Less(i, j int) bool {
 	return slice[i].Team < slice[j].Team
-}
-
-func (match *Match) Alliance(alliance Alliance) []TeamInfo {
-	teams := make([]TeamInfo, 0, len(match.Teams)/2)
-	for _, info := range match.Teams {
-		if info.Alliance == alliance {
-			teams = append(teams, info)
-		}
-	}
-	sort.Sort(byTeamNumber(teams))
-	return teams
-}
-
-type TeamInfo struct {
-	Team      int
-	Alliance  Alliance
-	Score     int
-	ScoutName string `bson:"scout"`
-	Failure   bool
-	NoShow    bool
-}
-
-func FetchEvent(database mgo.Database, tag EventTag) (*Event, os.Error) {
-	query := database.C("events").Find(bson.M{"date.year": tag.Year, "location.code": tag.LocationCode})
-	var event Event
-	if err := query.One(&event); err != nil {
-		return nil, err
-	}
-	return &event, nil
-}
-
-func matchCollection(tag EventTag) string {
-	return "matches." + tag.String()
-}
-
-func FetchMatches(database mgo.Database, eventTag EventTag) ([]*Match, os.Error) {
-	// TODO
-	return nil, nil
 }
