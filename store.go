@@ -16,6 +16,7 @@ type Datastore interface {
 	Events(year int) Pager
 
 	FetchTeam(int) (*Team, os.Error)
+	FetchTeams([]int) ([]*Team, os.Error)
 	FetchEvent(EventTag) (*Event, os.Error)
 	FetchMatches(EventTag) ([]*Match, os.Error)
 	FetchMatch(MatchTag) (*Match, os.Error)
@@ -46,6 +47,15 @@ func (store mongoDatastore) fetchOne(collection string, filter interface{}, ptr 
 		err = StoreNotFound
 	}
 	return err
+}
+
+func (store mongoDatastore) FetchTeams(numbers []int) ([]*Team, os.Error) {
+	query := store.C(teamCollection).Find(bson.M{"_id": bson.M{"$in": numbers}}).Sort(bson.D{{"_id", 1}})
+	var teams []*Team
+	if err := query.All(&teams); err != nil {
+		return nil, err
+	}
+	return teams, nil
 }
 
 func (store mongoDatastore) FetchTeam(number int) (*Team, os.Error) {

@@ -1,0 +1,99 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    <title>{{.Event.Location.Name}}</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        {{template "logo.html"}}
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+                {{/* TODO: add match link */}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            <h1>{{.Event.Location.Name}}</h1>
+
+            <h2>Matches</h2>
+            <table class="listing">
+                <thead>
+                    <tr>
+                        <th class="match" scope="col">Match</th>
+                        <th class="red_alliance" scope="col">Red Alliance</th>
+                        <th class="red_alliance score" scope="col">Red Score</th>
+                        <th class="blue_alliance" scope="col">Blue Alliance</th>
+                        <th class="blue_alliance score" scope="col">Blue Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $i, $match := .Matches}}
+                    <tr class="{{cycle $i "odd" "even"}}">
+                        {{/* TODO: s/#/Match URL */}}
+                        <td class="match"><a href="#">{{with $match}}{{.Type.DisplayName}} {{.Number}}{{end}}</a></td>
+                        {{template "alliance-info.html" $match.AllianceInfo "red"}}
+                        {{template "alliance-info.html" $match.AllianceInfo "blue"}}
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+
+            <h2>Teams Present</h2>
+            <table class="team_list listing">
+                <thead>
+                    <tr>
+                        <th class="team_number" scope="col">#</th>
+                        <th class="team_name" scope="col">Name</th>
+                        <th class="robot_name" scope="col">Robot Name</th>
+                        <th class="team_matches" scope="col">Matches</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $i, $team := .Teams}}
+                    <tr class="{{cycle $i "odd" "even"}}">
+                        {{with $teamURL := print .Number|route "team.view" "number"}}{{with $team}}
+                        <td class="team_number"><a href="{{$teamURL}}">{{.Number}}</a></td>
+                        <td class="team_name">{{with .Name}}<a href="{{$teamURL}}">{{.}}</a>{{end}}</td>
+                        <td class="robot_name">{{with .Robot.Name}}<a href="{{$teamURL}}#robot">{{.}}</a>{{end}}</td>
+                        {{/* TODO: Matches link */}}
+                        <td class="team_matches"><a href="#">Matches</a></td>
+                        {{end}}{{end}}
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+
+            <h2>Reports</h2>
+            <ul>
+                {{/* TODO: Links */}}
+                <li><a href="#">Scouting Forms</a></li>
+                <li><a href="#">Match Sheets</a></li>
+                <li><a href="#">Download as Spreadsheet</a></li>
+            </ul>
+
+            <h2>Links</h2>
+
+            <div id="copy">
+                <ul>
+                    {{with .Event}}
+                    <li><a href="http://frclinks.appspot.com/event/{{.Location.Code}}/{{.Date.Year}}">FRC Info</a></li>
+                    <li><a href="http://frclinks.appspot.com/event/tba/{{.Location.Code}}/{{.Date.Year}}">The Blue Alliance</a></li>
+                    {{end}}
+                </ul>
+            </div>
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>
+

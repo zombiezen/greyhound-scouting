@@ -110,7 +110,8 @@ type Match struct {
 	Score  map[Alliance]int `bson:",omitempty"`
 }
 
-func (match *Match) Alliance(alliance Alliance) []TeamInfo {
+func (match *Match) AllianceInfo(alliance Alliance) AllianceInfo {
+	// Get teams in alliance
 	teams := make([]TeamInfo, 0, len(match.Teams)/2)
 	for _, info := range match.Teams {
 		if info.Alliance == alliance {
@@ -118,7 +119,32 @@ func (match *Match) Alliance(alliance Alliance) []TeamInfo {
 		}
 	}
 	sort.Sort(byTeamNumber(teams))
-	return teams
+
+	// Get alliance score
+	var score int
+	if match.Score != nil {
+		score = match.Score[alliance]
+	}
+
+	// Create info struct
+	return AllianceInfo{
+		Alliance: alliance,
+		Teams:    teams,
+		Score:    score,
+		Won:      match.Winner() == alliance,
+	}
+}
+
+func (match *Match) Winner() Alliance {
+	switch {
+	case match.Score == nil:
+		return ""
+	case match.Score[Red] > match.Score[Blue]:
+		return Red
+	case match.Score[Red] < match.Score[Blue]:
+		return Blue
+	}
+	return ""
 }
 
 type byMatchOrder []*Match
@@ -159,4 +185,11 @@ func (slice byTeamNumber) Swap(i, j int) {
 
 func (slice byTeamNumber) Less(i, j int) bool {
 	return slice[i].Team < slice[j].Team
+}
+
+type AllianceInfo struct {
+	Alliance Alliance
+	Teams    []TeamInfo
+	Score    int
+	Won      bool
 }

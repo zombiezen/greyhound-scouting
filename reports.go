@@ -36,8 +36,8 @@ func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight float32, 
 
 		// Retrieve the list of teams (in sorted order, red first, then blue)
 		teamList := make([]TeamInfo, 0, len(match.Teams))
-		teamList = append(teamList, match.Alliance(Red)...)
-		teamList = append(teamList, match.Alliance(Blue)...)
+		teamList = append(teamList, match.AllianceInfo(Red).Teams...)
+		teamList = append(teamList, match.AllianceInfo(Blue).Teams...)
 
 		for _, info := range teamList {
 			renderScoutForm(canvas, sizeX, sizeY, event, match, info.Team)

@@ -17,8 +17,11 @@ const templatePrefix = "templates/"
 
 var escapedTemplates = []string{
 	"index.html",
+	"jump.html",
 	"team.html",
 	"team-index.html",
+	"event.html",
+	"event-index.html",
 	"error.html",
 	"error-debug.html",
 }
