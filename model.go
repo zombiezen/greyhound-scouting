@@ -9,7 +9,7 @@ import (
 )
 
 type Team struct {
-	Number     int
+	Number     int `bson:"_id"`
 	Name       string
 	RookieYear int `bson:"rookie_year"`
 	Robot      *Robot
@@ -25,9 +25,9 @@ type MatchType string
 
 const (
 	Qualification MatchType = "qualification"
-	QuarterFinal            = "quarter"
-	SemiFinal               = "semifinal"
-	Final                   = "final"
+	QuarterFinal  MatchType = "quarter"
+	SemiFinal     MatchType = "semifinal"
+	Final         MatchType = "final"
 )
 
 func (t MatchType) String() string {
@@ -58,8 +58,7 @@ type Event struct {
 		Month int
 		Day   int
 	}
-	MatchIDs map[MatchType][]bson.ObjectId `bson:"matches"`
-	Teams    []int
+	Teams []int
 }
 
 func (event *Event) Tag() EventTag {
@@ -91,9 +90,10 @@ func (alliance Alliance) DisplayName() string {
 }
 
 type Match struct {
-	Teams []TeamInfo
-	Score map[Alliance]int `bson:",omitempty"`
-	Type  MatchType
+	Type   MatchType
+	Number int
+	Teams  []TeamInfo
+	Score  map[Alliance]int `bson:",omitempty"`
 }
 
 type byTeamNumber []TeamInfo
@@ -121,11 +121,6 @@ func (match *Match) Alliance(alliance Alliance) []TeamInfo {
 	return teams
 }
 
-type NumberedMatch struct {
-	Number int
-	Match
-}
-
 type TeamInfo struct {
 	Team      int
 	Alliance  Alliance
@@ -135,8 +130,8 @@ type TeamInfo struct {
 	NoShow    bool
 }
 
-func FetchEvent(database mgo.Database, year int, location string) (*Event, os.Error) {
-	query := database.C("events").Find(bson.M{"date.year": year, "location.code": location})
+func FetchEvent(database mgo.Database, tag EventTag) (*Event, os.Error) {
+	query := database.C("events").Find(bson.M{"date.year": tag.Year, "location.code": tag.LocationCode})
 	var event Event
 	if err := query.One(&event); err != nil {
 		return nil, err
@@ -148,7 +143,7 @@ func matchCollection(tag EventTag) string {
 	return "matches." + tag.String()
 }
 
-func FetchMatches(database mgo.Database, event *Event) ([]NumberedMatch, os.Error) {
+func FetchMatches(database mgo.Database, eventTag EventTag) ([]*Match, os.Error) {
 	// TODO
 	return nil, nil
 }

@@ -23,7 +23,7 @@ const (
 
 const scoutFormsPerPage = 3
 
-func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight float32, event *Event, matches []*NumberedMatch) {
+func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight float32, event *Event, matches []*Match) {
 	n := 0
 	sizeX, sizeY := pageWidth-reportMargin*2, (pageHeight-reportMargin*2)/scoutFormsPerPage
 
@@ -65,7 +65,7 @@ const (
 )
 
 // this will assume that both position and margins have already been transformed for.
-func renderScoutForm(canvas *pdf.Canvas, w, h float32, event *Event, match *NumberedMatch, teamNum int) {
+func renderScoutForm(canvas *pdf.Canvas, w, h float32, event *Event, match *Match, teamNum int) {
 	// Determine alliance
 	var alliance Alliance
 	for _, teamInfo := range match.Teams {

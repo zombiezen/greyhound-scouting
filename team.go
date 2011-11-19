@@ -19,7 +19,7 @@ func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 	}
 
 	// Query for teams
-	teams := server.DB().C("teams").Find(nil).Sort(bson.D{{"number", 1}})
+	teams := server.DB().C("teams").Find(nil).Sort(bson.D{{"_id", 1}})
 
 	// Paginate teams
 	p, err := NewPaginator(MongoPager{teams}, 50)
@@ -53,7 +53,7 @@ func viewTeam(server *Server, w http.ResponseWriter, req *http.Request) os.Error
 
 	// Fetch team
 	var team Team
-	err := server.DB().C("teams").Find(bson.M{"number": number}).One(&team)
+	err := server.DB().C("teams").Find(bson.M{"_id": number}).One(&team)
 	if err == mgo.NotFound {
 		http.NotFound(w, req)
 		return nil
