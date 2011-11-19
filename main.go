@@ -58,6 +58,9 @@ func main() {
 	server.Handle("/team/", server.Handler(teamIndex)).Name("team.index").RedirectSlash(true)
 	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view").RedirectSlash(true)
 
+	server.Handle("/event/", server.Handler(eventIndex)).Name("event.index").RedirectSlash(true)
+	server.Handle("/event/{year:[1-9][0-9]*}/{location:[a-z]+}/", server.Handler(viewEvent)).Name("event.view").RedirectSlash(true)
+
 	staticServer := http.FileServer(http.Dir(*staticdir))
 	server.HandleFunc("/static{path:/.*}", func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)

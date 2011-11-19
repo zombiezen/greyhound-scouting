@@ -2,6 +2,7 @@ include $(GOROOT)/src/Make.inc
 
 TARG=scouting
 GOFILES=\
+	event.go\
 	main.go\
 	model.go\
 	paging.go\

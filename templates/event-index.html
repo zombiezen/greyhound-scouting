@@ -1,0 +1,56 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    <title>Events</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        {{template "logo.html"}}
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+                {{/* TODO: create link */}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            <h1>Events</h1>
+
+            <p>These are the events for the current season.</p>
+
+            <table id="event_index" class="listing">
+                <thead>
+                    <tr>
+                        <th class="event_name" scope="col">Name</th>
+                        <th class="event_date" scope="col">Date</th>
+                        <th class="num_teams" scope="col"># of Teams</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $i, $event := .EventList}}
+                    {{with $eventURL := print .Date.Year | route "event.view" "location" .Location.Code "year" }}
+                    <tr class="{{cycle $i "odd" "even"}}">
+                        {{with $event}}
+                        <td class="event_name"><a href="{{$eventURL}}">{{.Location.Name}}</a></td>
+                        <td class="event_date">{{printf "%02d/%02d" .Date.Month .Date.Day}}</td>
+                        <td class="num_teams">{{len .Teams}}</td>
+                        {{end}}
+                    </tr>
+                    {{end}}
+                    {{end}}
+                </tbody>
+            </table>
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>

@@ -1,8 +1,11 @@
 package main
 
 import (
-	"launchpad.net/gobson/bson"
+	"os"
 	"sort"
+
+	"launchpad.net/mgo"
+	"launchpad.net/gobson/bson"
 )
 
 type Team struct {
@@ -108,7 +111,7 @@ func (slice byTeamNumber) Less(i, j int) bool {
 }
 
 func (match *Match) Alliance(alliance Alliance) []TeamInfo {
-	teams := make([]TeamInfo, 0, len(match.Teams) / 2)
+	teams := make([]TeamInfo, 0, len(match.Teams)/2)
 	for _, info := range match.Teams {
 		if info.Alliance == alliance {
 			teams = append(teams, info)
@@ -130,4 +133,22 @@ type TeamInfo struct {
 	ScoutName string `bson:"scout"`
 	Failure   bool
 	NoShow    bool
+}
+
+func FetchEvent(database mgo.Database, year int, location string) (*Event, os.Error) {
+	query := database.C("events").Find(bson.M{"date.year": year, "location.code": location})
+	var event Event
+	if err := query.One(&event); err != nil {
+		return nil, err
+	}
+	return &event, nil
+}
+
+func matchCollection(tag EventTag) string {
+	return "matches." + tag.String()
+}
+
+func FetchMatches(database mgo.Database, event *Event) ([]NumberedMatch, os.Error) {
+	// TODO
+	return nil, nil
 }
