@@ -70,6 +70,34 @@ func viewEvent(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 	})
 }
 
+func routeMatchTag(vars mux.RouteVars) MatchTag {
+	num, _ := strconv.Atoui(vars["matchNumber"])
+	return MatchTag{
+		EventTag:    routeEventTag(vars),
+		MatchType:   MatchType(vars["matchType"]),
+		MatchNumber: num,
+	}
+}
+
+func viewMatch(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+	vars := mux.Vars(req)
+
+	// Fetch match
+	match, err := server.Store().FetchMatch(routeMatchTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	return server.TemplateSet().Execute(w, "match.html", map[string]interface{}{
+		"Server":  server,
+		"Request": req,
+		"Match": match,
+	})
+}
+
 func eventScoutForms(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
 	vars := mux.Vars(req)
 

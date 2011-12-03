@@ -29,6 +29,8 @@ func NewServer(store Datastore) *Server {
 	}
 	server.templates.Funcs(template.FuncMap{
 		"route": server.routeFunc(),
+		"eventRoute": server.eventRouteFunc(),
+		"matchRoute": server.matchRouteFunc(),
 		"cycle": func(i int, vals ...interface{}) interface{} {
 			return vals[i%len(vals)]
 		},
@@ -85,6 +87,44 @@ func (server *Server) routeFunc() func(string, ...string) (htmltemplate.URL, os.
 		url := route.URL(pairs...)
 		if url == nil {
 			return "", fmt.Errorf("Bad set of pairs for route %q: %v", name, pairs)
+		}
+		return htmltemplate.URL(url.String()), nil
+	}
+}
+
+func (server *Server) eventRouteFunc() func(string, EventTag, ...string) (htmltemplate.URL, os.Error) {
+	return func(name string, tag EventTag, pairs ...string) (htmltemplate.URL, os.Error) {
+		route, ok := server.NamedRoutes[name]
+		if !ok {
+			return "", fmt.Errorf("Could not resolve route %q", name)
+		}
+		args := make([]string, 0, len(pairs) + 4)
+		args = append(args, "year", fmt.Sprint(tag.Year))
+		args = append(args, "location", tag.LocationCode)
+		args = append(args, pairs...)
+		url := route.URL(args...)
+		if url == nil {
+			return "", fmt.Errorf("Bad set of pairs for event route %q: %v", name, pairs)
+		}
+		return htmltemplate.URL(url.String()), nil
+	}
+}
+
+func (server *Server) matchRouteFunc() func(string, EventTag, MatchType, int, ...string) (htmltemplate.URL, os.Error) {
+	return func(name string, tag EventTag, matchType MatchType, matchNum int, pairs ...string) (htmltemplate.URL, os.Error) {
+		route, ok := server.NamedRoutes[name]
+		if !ok {
+			return "", fmt.Errorf("Could not resolve route %q", name)
+		}
+		args := make([]string, 0, len(pairs) + 8)
+		args = append(args, "year", fmt.Sprint(tag.Year))
+		args = append(args, "location", tag.LocationCode)
+		args = append(args, "matchType", string(matchType))
+		args = append(args, "matchNumber", fmt.Sprint(matchNum))
+		args = append(args, pairs...)
+		url := route.URL(args...)
+		if url == nil {
+			return "", fmt.Errorf("Bad set of pairs for match route %q: %v", name, pairs)
 		}
 		return htmltemplate.URL(url.String()), nil
 	}

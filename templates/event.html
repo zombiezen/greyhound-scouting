@@ -35,8 +35,11 @@
                 <tbody>
                     {{range $i, $match := .Matches}}
                     <tr class="{{cycle $i "odd" "even"}}">
-                        {{/* TODO: s/#/Match URL */}}
-                        <td class="match"><a href="#">{{with $match}}{{.Type.DisplayName}} {{.Number}}{{end}}</a></td>
+                        <td class="match">
+                            {{with $match}}
+                            <a href="{{matchRoute "match.view" $.Event.Tag .Type .Number}}">{{.Type.DisplayName}} {{.Number}}</a>
+                            {{end}}
+                        </td>
                         {{template "alliance-info.html" $match.AllianceInfo "red"}}
                         {{template "alliance-info.html" $match.AllianceInfo "blue"}}
                     </tr>

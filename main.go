@@ -27,6 +27,7 @@ var escapedTemplates = []string{
 }
 
 const eventURLPrefix = "/event/{year:[1-9][0-9]*}/{location:[a-z]+}/"
+const matchURLPrefix = eventURLPrefix + "match/{matchType:qualification|quarter|semifinal|final}/{matchNumber:[1-9][0-9]*}/"
 
 func main() {
 	mongoURL := flag.String("mongo", "localhost", "The URL for the MongoDB instance")
@@ -66,6 +67,8 @@ func main() {
 	server.Handle("/event/", server.Handler(eventIndex)).Name("event.index").RedirectSlash(true)
 	server.Handle(eventURLPrefix, server.Handler(viewEvent)).Name("event.view").RedirectSlash(true)
 	server.Handle(eventURLPrefix+"scout-forms.pdf", server.Handler(eventScoutForms)).Name("event.scoutForms")
+
+	server.Handle(matchURLPrefix, server.Handler(viewMatch)).Name("match.view").RedirectSlash(true)
 
 	staticServer := http.FileServer(http.Dir(*staticdir))
 	server.HandleFunc("/static{path:/.*}", func(w http.ResponseWriter, req *http.Request) {

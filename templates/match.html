@@ -1,0 +1,37 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    {{with .Match}}<title>{{/* TODO: Event */}} {{.Type.DisplayName}} Match {{.Number}}</title>{{end}}
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        {{template "logo.html"}}
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+                {{/* TODO: edit match link */}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            {{with .Match}}<h1>{{/* TODO: Event */}} {{.Type.DisplayName}} Match {{.Number}}</h1>{{end}}
+
+            {{/* TODO: Video */}}
+
+            <h2>Reports</h2>
+            <p><a href="#">Scouting Forms</a></p>
+            <p><a href="#">Match Sheet</a></p>
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>
