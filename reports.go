@@ -23,7 +23,7 @@ const (
 
 const scoutFormsPerPage = 3
 
-func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight float32, event *Event, matches []*Match) {
+func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *Event, matches []*Match) {
 	n := 0
 	sizeX, sizeY := pageWidth-reportMargin*2, (pageHeight-reportMargin*2)/scoutFormsPerPage
 
@@ -46,7 +46,7 @@ func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight float32, 
 			} else {
 				// Page divider
 				// TODO: set dash
-				canvas.DrawLine(0, 0, sizeX, 0)
+				canvas.DrawLine(pdf.Point{0, 0}, pdf.Point{sizeX, 0})
 				canvas.Translate(0, -pageHeight/scoutFormsPerPage)
 			}
 			n++
@@ -64,7 +64,7 @@ const (
 )
 
 // this will assume that both position and margins have already been transformed for.
-func renderScoutForm(canvas *pdf.Canvas, w, h float32, event *Event, match *Match, teamNum int) {
+func renderScoutForm(canvas *pdf.Canvas, w, h pdf.Unit, event *Event, match *Match, teamNum int) {
 	// Determine alliance
 	var alliance Alliance
 	for _, teamInfo := range match.Teams {
@@ -94,7 +94,7 @@ func renderScoutForm(canvas *pdf.Canvas, w, h float32, event *Event, match *Matc
 	// Alliance
 	baseline += text.Y() - 0.25*pdf.Inch - allianceFontSize
 	renderFields(
-		canvas, 0, baseline,
+		canvas, pdf.Point{0, baseline},
 		allianceFontName, allianceFontSize,
 		scoutFormAllianceLine,
 		fmt.Sprintf("%s Alliance Score:", alliance.DisplayName()),
@@ -102,15 +102,15 @@ func renderScoutForm(canvas *pdf.Canvas, w, h float32, event *Event, match *Matc
 
 	// Scores
 	baseline -= scoreFontSize + 0.25*pdf.Inch
-	formx, formy1 := renderFields(canvas, 0, baseline, pdf.Helvetica, scoreFontSize, 1.0*pdf.Inch, "High:", "Middle:", "Low:")
-	formx, formy2 := renderFields(canvas, formx+0.25*pdf.Inch, baseline, pdf.Helvetica, scoreFontSize, 0.75*pdf.Inch, "Ubertube (H/M/L/X):", "Minibot Rank:")
-	formx, formy3 := renderFields(canvas, formx+0.5*pdf.Inch, baseline, pdf.Helvetica, scoreFontSize, 0.75*pdf.Inch, "Failure:", "No-Show:")
-	_, _ = formy2, formy3
+	formPt1 := renderFields(canvas, pdf.Point{0, baseline}, pdf.Helvetica, scoreFontSize, 1.0*pdf.Inch, "High:", "Middle:", "Low:")
+	formPt2 := renderFields(canvas, pdf.Point{formPt1.X + 0.25*pdf.Inch, baseline}, pdf.Helvetica, scoreFontSize, 0.75*pdf.Inch, "Ubertube (H/M/L/X):", "Minibot Rank:")
+	formPt3 := renderFields(canvas, pdf.Point{formPt2.X + 0.5*pdf.Inch, baseline}, pdf.Helvetica, scoreFontSize, 0.75*pdf.Inch, "Failure:", "No-Show:")
+	_ = formPt3
 
 	// Scout name
-	// TODO: don't assume formy1 is the lowest
-	baseline += formy1 - (scoreFontSize + 0.4*pdf.Inch)
-	renderFields(canvas, 0, baseline, pdf.Helvetica, scoreFontSize, 3.0*pdf.Inch, "Scout Name:")
+	// TODO: don't assume formPt1.Y is the lowest
+	baseline += formPt1.Y - (scoreFontSize + 0.4*pdf.Inch)
+	renderFields(canvas, pdf.Point{0, baseline}, pdf.Helvetica, scoreFontSize, 3.0*pdf.Inch, "Scout Name:")
 }
 
 const (
@@ -118,10 +118,10 @@ const (
 	fieldLinePadding = 0.125 * pdf.Inch
 )
 
-func renderFields(canvas *pdf.Canvas, x, y float32, fontName pdf.Name, fontSize float32, lineLength float32, labels ...string) (right, bottom float32) {
+func renderFields(canvas *pdf.Canvas, pt pdf.Point, fontName string, fontSize pdf.Unit, lineLength pdf.Unit, labels ...string) pdf.Point {
 	canvas.Push()
 	defer canvas.Pop()
-	canvas.Translate(x, y)
+	canvas.Translate(pt.X, pt.Y)
 
 	text := new(pdf.Text)
 	text.SetFont(fontName, fontSize)
@@ -129,7 +129,7 @@ func renderFields(canvas *pdf.Canvas, x, y float32, fontName pdf.Name, fontSize 
 	text.SetLeading(leading)
 
 	// Draw labels
-	rightSide := float32(0)
+	var rightSide pdf.Unit
 	for _, label := range labels {
 		if label != "" {
 			text.Text(label)
@@ -142,15 +142,15 @@ func renderFields(canvas *pdf.Canvas, x, y float32, fontName pdf.Name, fontSize 
 	canvas.DrawText(text)
 
 	// Draw field lines
-	var baseline float32
+	var baseline pdf.Unit
 	for i, label := range labels {
 		if label == "" {
 			continue
 		}
-		baseline = -leading * float32(i)
+		baseline = -leading * pdf.Unit(i)
 		originX := rightSide + fieldLinePadding
-		canvas.DrawLine(originX, baseline, originX+lineLength, baseline)
+		canvas.DrawLine(pdf.Point{originX, baseline}, pdf.Point{originX + lineLength, baseline})
 	}
 
-	return x + rightSide + fieldLinePadding + lineLength, baseline
+	return pdf.Point{pt.X + rightSide + fieldLinePadding + lineLength, baseline}
 }
