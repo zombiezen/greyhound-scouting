@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"testing"
 )
@@ -12,7 +11,7 @@ type tagTest struct {
 	Tag    interface{}
 }
 
-func checkTagParseResult(t *testing.T, name string, tt tagTest, result interface{}, err os.Error) {
+func checkTagParseResult(t *testing.T, name string, tt tagTest, result interface{}, err error) {
 	switch {
 	case err != nil && tt.Tag != nil:
 		t.Errorf("%s(%q) error: %v", name, tt.String, err)

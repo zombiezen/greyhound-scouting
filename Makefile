@@ -1,5 +1,3 @@
-include $(GOROOT)/src/Make.inc
-
 TARG=scouting
 GOFILES=\
 	event.go\
@@ -12,8 +10,6 @@ GOFILES=\
 	tags.go\
 	team.go\
 
-include $(GOROOT)/src/Make.cmd
-
 CSSFILES=\
     static/css/all.css\
     static/css/generic.css\
@@ -21,11 +17,22 @@ CSSFILES=\
     static/css/reset.css\
     static/css/style.css\
 
-CLEANFILES+=$(CSSFILES)
+CLEANFILES=\
+	$(TARG)\
+	$(CSSFILES)
+
+all: $(TARG) css
+
+clean:
+	rm -f $(CLEANFILES)
+
+$(TARG): $(GOFILES)
+	go build -o $(TARG) $(GOFILES)
+
+css: $(CSSFILES)
 
 static/css/%.css: sass/%.scss
 	mkdir -p static/css
 	sass $< $@
 
-all: css
-css: $(CSSFILES)
+.PHONY: all clean

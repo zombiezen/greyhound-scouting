@@ -1,9 +1,0 @@
-{{define "alliance-info.html"}}
-    <td class="{{.Alliance}}_alliance{{if .Won}} winner{{end}}">
-        {{range .Teams}}
-            {{with .Team}}<a href="{{print .|route "team.view" "number"}}">{{.}}</a>{{end}}
-            {{/* TODO: Add commas */}}
-        {{end}}
-    </td>
-    <td class="{{.Alliance}}_alliance score{{if .Won}} winner{{end}}">{{.Score}}</td>
-{{end}}

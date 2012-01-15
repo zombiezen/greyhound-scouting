@@ -1,14 +1,13 @@
 package main
 
 import (
-	"http"
-	"os"
+	"net/http"
 	"strconv"
 
-	"gorilla.googlecode.com/hg/gorilla/mux"
+	"code.google.com/p/gorilla/gorilla/mux"
 )
 
-func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) error {
 	// Determine page number
 	pageNumber, err := strconv.Atoi(req.FormValue("page"))
 	if err != nil {
@@ -33,7 +32,7 @@ func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 	}
 
 	// Render page
-	return server.TemplateSet().Execute(w, "team-index.html", map[string]interface{}{
+	return server.Templates().ExecuteTemplate(w, "team-index.html", map[string]interface{}{
 		"Server":   server,
 		"Request":  req,
 		"TeamList": teamList,
@@ -41,7 +40,7 @@ func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 	})
 }
 
-func viewTeam(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+func viewTeam(server *Server, w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 	number, _ := strconv.Atoi(vars["number"])
 
@@ -57,7 +56,7 @@ func viewTeam(server *Server, w http.ResponseWriter, req *http.Request) os.Error
 	// TODO: stats
 	// TODO: image
 
-	return server.TemplateSet().Execute(w, "team.html", map[string]interface{}{
+	return server.Templates().ExecuteTemplate(w, "team.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
 		"Team":    team,

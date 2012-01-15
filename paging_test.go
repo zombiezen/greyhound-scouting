@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"reflect"
 	"testing"
 )
@@ -19,7 +18,7 @@ func newIntSlicePager(data ...int) *intSlicePager {
 	}
 }
 
-func (pager *intSlicePager) Count() (int, os.Error) {
+func (pager *intSlicePager) Count() (int, error) {
 	return len(pager.slice), nil
 }
 
@@ -33,7 +32,7 @@ func (pager *intSlicePager) Limit(n int) Pager {
 	return pager
 }
 
-func (pager *intSlicePager) All(in interface{}) os.Error {
+func (pager *intSlicePager) All(in interface{}) error {
 	ptr := in.(*[]int)
 	switch {
 	case pager.offset > len(pager.slice):

@@ -2,21 +2,19 @@ package main
 
 import (
 	"bytes"
-	htmltemplate "exp/template/html"
+	"code.google.com/p/gorilla/gorilla/mux"
 	"fmt"
-	"gorilla.googlecode.com/hg/gorilla/mux"
-	"http"
+	"html/template"
 	"io"
 	"log"
-	"os"
+	"net/http"
 	"strconv"
-	"template"
 )
 
 type Server struct {
 	*mux.Router
 	datastore Datastore
-	templates *template.Set
+	templates *template.Template
 	Debug     bool
 }
 
@@ -24,11 +22,11 @@ func NewServer(store Datastore) *Server {
 	server := &Server{
 		Router:    new(mux.Router),
 		datastore: store,
-		templates: new(template.Set),
+		templates: template.New(""),
 		Debug:     true,
 	}
 	server.templates.Funcs(template.FuncMap{
-		"route": server.routeFunc(),
+		"route":      server.routeFunc(),
 		"eventRoute": server.eventRouteFunc(),
 		"matchRoute": server.matchRouteFunc(),
 		"cycle": func(i int, vals ...interface{}) interface{} {
@@ -38,7 +36,7 @@ func NewServer(store Datastore) *Server {
 	return server
 }
 
-func (server *Server) TemplateSet() *template.Set {
+func (server *Server) Templates() *template.Template {
 	return server.templates
 }
 
@@ -46,13 +44,13 @@ func (server *Server) Store() Datastore {
 	return server.datastore
 }
 
-type ServerHandlerFunc func(*Server, http.ResponseWriter, *http.Request) os.Error
+type ServerHandlerFunc func(*Server, http.ResponseWriter, *http.Request) error
 
 func (server *Server) Handler(f ServerHandlerFunc) http.Handler {
 	return serverHandler{server, f}
 }
 
-func (server *Server) logError(req *http.Request, err os.Error) {
+func (server *Server) logError(req *http.Request, err error) {
 	var b bytes.Buffer
 	fmt.Fprintf(&b, "ERROR %s %s\n", req.Method, req.URL.Path)
 	fmt.Fprintf(&b, "\tMessage:\n\t\t%v\n", err)
@@ -78,8 +76,8 @@ func (server *Server) logError(req *http.Request, err os.Error) {
 	log.Print(&b)
 }
 
-func (server *Server) routeFunc() func(string, ...string) (htmltemplate.URL, os.Error) {
-	return func(name string, pairs ...string) (htmltemplate.URL, os.Error) {
+func (server *Server) routeFunc() func(string, ...string) (template.URL, error) {
+	return func(name string, pairs ...string) (template.URL, error) {
 		route, ok := server.NamedRoutes[name]
 		if !ok {
 			return "", fmt.Errorf("Could not resolve route %q", name)
@@ -88,17 +86,17 @@ func (server *Server) routeFunc() func(string, ...string) (htmltemplate.URL, os.
 		if url == nil {
 			return "", fmt.Errorf("Bad set of pairs for route %q: %v", name, pairs)
 		}
-		return htmltemplate.URL(url.String()), nil
+		return template.URL(url.String()), nil
 	}
 }
 
-func (server *Server) eventRouteFunc() func(string, EventTag, ...string) (htmltemplate.URL, os.Error) {
-	return func(name string, tag EventTag, pairs ...string) (htmltemplate.URL, os.Error) {
+func (server *Server) eventRouteFunc() func(string, EventTag, ...string) (template.URL, error) {
+	return func(name string, tag EventTag, pairs ...string) (template.URL, error) {
 		route, ok := server.NamedRoutes[name]
 		if !ok {
 			return "", fmt.Errorf("Could not resolve route %q", name)
 		}
-		args := make([]string, 0, len(pairs) + 4)
+		args := make([]string, 0, len(pairs)+4)
 		args = append(args, "year", fmt.Sprint(tag.Year))
 		args = append(args, "location", tag.LocationCode)
 		args = append(args, pairs...)
@@ -106,17 +104,17 @@ func (server *Server) eventRouteFunc() func(string, EventTag, ...string) (htmlte
 		if url == nil {
 			return "", fmt.Errorf("Bad set of pairs for event route %q: %v", name, pairs)
 		}
-		return htmltemplate.URL(url.String()), nil
+		return template.URL(url.String()), nil
 	}
 }
 
-func (server *Server) matchRouteFunc() func(string, EventTag, MatchType, int, ...string) (htmltemplate.URL, os.Error) {
-	return func(name string, tag EventTag, matchType MatchType, matchNum int, pairs ...string) (htmltemplate.URL, os.Error) {
+func (server *Server) matchRouteFunc() func(string, EventTag, MatchType, int, ...string) (template.URL, error) {
+	return func(name string, tag EventTag, matchType MatchType, matchNum int, pairs ...string) (template.URL, error) {
 		route, ok := server.NamedRoutes[name]
 		if !ok {
 			return "", fmt.Errorf("Could not resolve route %q", name)
 		}
-		args := make([]string, 0, len(pairs) + 8)
+		args := make([]string, 0, len(pairs)+8)
 		args = append(args, "year", fmt.Sprint(tag.Year))
 		args = append(args, "location", tag.LocationCode)
 		args = append(args, "matchType", string(matchType))
@@ -126,7 +124,7 @@ func (server *Server) matchRouteFunc() func(string, EventTag, MatchType, int, ..
 		if url == nil {
 			return "", fmt.Errorf("Bad set of pairs for match route %q: %v", name, pairs)
 		}
-		return htmltemplate.URL(url.String()), nil
+		return template.URL(url.String()), nil
 	}
 }
 
@@ -149,7 +147,7 @@ func (handler serverHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		if handler.server.Debug {
 			req.ParseForm()
 			w.WriteHeader(http.StatusInternalServerError)
-			handler.server.TemplateSet().Execute(w, "error-debug.html", map[string]interface{}{
+			handler.server.Templates().ExecuteTemplate(w, "error-debug.html", map[string]interface{}{
 				"Server":    handler.server,
 				"Error":     err,
 				"Request":   req,
@@ -157,7 +155,7 @@ func (handler serverHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 			})
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			handler.server.TemplateSet().Execute(w, "error.html", map[string]interface{}{
+			handler.server.Templates().ExecuteTemplate(w, "error.html", map[string]interface{}{
 				"Server":  handler.server,
 				"Error":   err,
 				"Request": req,
@@ -182,7 +180,7 @@ func (buffer *ResponseBuffer) HeaderSent() http.Header {
 	return buffer.sent
 }
 
-func (buffer *ResponseBuffer) Flush(w http.ResponseWriter) os.Error {
+func (buffer *ResponseBuffer) Flush(w http.ResponseWriter) error {
 	for k, v := range buffer.sent {
 		w.Header()[k] = v
 	}
@@ -210,7 +208,7 @@ func (buffer *ResponseBuffer) WriteHeader(code int) {
 	}
 }
 
-func (buffer *ResponseBuffer) Write(p []byte) (int, os.Error) {
+func (buffer *ResponseBuffer) Write(p []byte) (int, error) {
 	buffer.WriteHeader(http.StatusOK)
 	return buffer.Buffer.Write(p)
 }
@@ -238,7 +236,7 @@ func (rec *responseRecorder) WriteHeader(statusCode int) {
 	rec.statusCode = statusCode
 }
 
-func (rec *responseRecorder) Write(p []byte) (n int, err os.Error) {
+func (rec *responseRecorder) Write(p []byte) (n int, err error) {
 	n, err = rec.ResponseWriter.Write(p)
 	rec.size += int64(n)
 	return

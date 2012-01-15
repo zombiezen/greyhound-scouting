@@ -1,16 +1,16 @@
 package main
 
 import (
-	"os"
+	"errors"
 	"launchpad.net/mgo"
 )
 
 // A Pager is something that can be paginated over.
 type Pager interface {
-	Count() (int, os.Error)
+	Count() (int, error)
 	Offset(int) Pager
 	Limit(int) Pager
-	All(interface{}) os.Error
+	All(interface{}) error
 }
 
 type Paginator struct {
@@ -19,9 +19,9 @@ type Paginator struct {
 	count   int
 }
 
-func NewPaginator(pager Pager, per int) (*Paginator, os.Error) {
+func NewPaginator(pager Pager, per int) (*Paginator, error) {
 	if per < 1 {
-		return nil, os.NewError("There must be at least one result per page")
+		return nil, errors.New("There must be at least one result per page")
 	}
 	count, err := pager.Count()
 	if err != nil {
@@ -77,7 +77,7 @@ func (page Page) PreviousNumber() int {
 }
 
 // Get fetches all of the objects on the page.
-func (page Page) Get(i interface{}) os.Error {
+func (page Page) Get(i interface{}) error {
 	return page.Pager.Offset(page.Index * page.PerPage).Limit(page.PerPage).All(i)
 }
 

@@ -1,19 +1,18 @@
 package main
 
 import (
-	"http"
-	"os"
+	"net/http"
 	"strconv"
 	"time"
 
 	"bitbucket.org/zombiezen/gopdf/pdf"
 
-	"gorilla.googlecode.com/hg/gorilla/mux"
+	"code.google.com/p/gorilla/gorilla/mux"
 )
 
-func eventIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+func eventIndex(server *Server, w http.ResponseWriter, req *http.Request) error {
 	// Query for events
-	events := server.Store().Events(int(time.LocalTime().Year))
+	events := server.Store().Events(time.Now().Year())
 
 	// Fetch events
 	var eventList []Event
@@ -22,7 +21,7 @@ func eventIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Err
 	}
 
 	// Render page
-	return server.TemplateSet().Execute(w, "event-index.html", map[string]interface{}{
+	return server.Templates().ExecuteTemplate(w, "event-index.html", map[string]interface{}{
 		"Server":    server,
 		"Request":   req,
 		"EventList": eventList,
@@ -30,14 +29,14 @@ func eventIndex(server *Server, w http.ResponseWriter, req *http.Request) os.Err
 }
 
 func routeEventTag(vars mux.RouteVars) EventTag {
-	year, _ := strconv.Atoui(vars["year"])
+	year64, _ := strconv.ParseUint(vars["year"], 10, 0)
 	return EventTag{
-		Year:         year,
+		Year:         uint(year64),
 		LocationCode: vars["location"],
 	}
 }
 
-func viewEvent(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+func viewEvent(server *Server, w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 
 	// Fetch event
@@ -61,7 +60,7 @@ func viewEvent(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 		return err
 	}
 
-	return server.TemplateSet().Execute(w, "event.html", map[string]interface{}{
+	return server.Templates().ExecuteTemplate(w, "event.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
 		"Event":   event,
@@ -71,15 +70,15 @@ func viewEvent(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 }
 
 func routeMatchTag(vars mux.RouteVars) MatchTag {
-	num, _ := strconv.Atoui(vars["matchNumber"])
+	num64, _ := strconv.ParseUint(vars["matchNumber"], 10, 0)
 	return MatchTag{
 		EventTag:    routeEventTag(vars),
 		MatchType:   MatchType(vars["matchType"]),
-		MatchNumber: num,
+		MatchNumber: uint(num64),
 	}
 }
 
-func viewMatch(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+func viewMatch(server *Server, w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 
 	// Fetch match
@@ -91,14 +90,14 @@ func viewMatch(server *Server, w http.ResponseWriter, req *http.Request) os.Erro
 		return err
 	}
 
-	return server.TemplateSet().Execute(w, "match.html", map[string]interface{}{
+	return server.Templates().ExecuteTemplate(w, "match.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
-		"Match": match,
+		"Match":   match,
 	})
 }
 
-func eventScoutForms(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+func eventScoutForms(server *Server, w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 
 	// Fetch event

@@ -1,30 +1,17 @@
 package main
 
 import (
-	htmltemplate "exp/template/html"
 	"flag"
-	"http"
 	"log"
-	"os"
+	"net/http"
 	"strconv"
 
 	"launchpad.net/mgo"
 
-	"gorilla.googlecode.com/hg/gorilla/mux"
+	"code.google.com/p/gorilla/gorilla/mux"
 )
 
 const templatePrefix = "templates/"
-
-var escapedTemplates = []string{
-	"index.html",
-	"jump.html",
-	"team.html",
-	"team-index.html",
-	"event.html",
-	"event-index.html",
-	"error.html",
-	"error-debug.html",
-}
 
 const eventURLPrefix = "/event/{year:[1-9][0-9]*}/{location:[a-z]+}/"
 const matchURLPrefix = eventURLPrefix + "match/{matchType:qualification|quarter|semifinal|final}/{matchNumber:[1-9][0-9]*}/"
@@ -45,17 +32,11 @@ func main() {
 	server := NewServer(mongoDatastore{session.DB(*database)})
 	server.Debug = *debug
 
-	if _, err := server.TemplateSet().ParseGlob(templatePrefix + "sets/*.html"); err != nil {
-		log.Fatalf("Could not load template sets: %v", err)
-	}
-	if _, err := server.TemplateSet().ParseTemplateGlob(templatePrefix + "*.html"); err != nil {
+	if _, err := server.Templates().ParseGlob(templatePrefix + "*.html"); err != nil {
 		log.Fatalf("Could not load templates: %v", err)
 	}
-	if _, err := server.TemplateSet().ParseTemplateFiles(templatePrefix + "gopher"); err != nil {
+	if _, err := server.Templates().ParseFiles(templatePrefix + "gopher"); err != nil {
 		log.Fatalf("Could not load gopher: %v", err)
-	}
-	if _, err := htmltemplate.EscapeSet(server.TemplateSet(), escapedTemplates...); err != nil {
-		log.Fatalf("Could not autoescape templates: %v", err)
 	}
 
 	server.Handle("/", server.Handler(index)).Name("root")
@@ -81,14 +62,14 @@ func main() {
 	http.ListenAndServe(*address, Logger{server})
 }
 
-func index(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
-	return server.TemplateSet().Execute(w, "index.html", map[string]interface{}{
+func index(server *Server, w http.ResponseWriter, req *http.Request) error {
+	return server.Templates().ExecuteTemplate(w, "index.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
 	})
 }
 
-func jump(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
+func jump(server *Server, w http.ResponseWriter, req *http.Request) error {
 	query := req.FormValue("q")
 	log.Printf("Jump %q", query)
 	if query != "" {
@@ -101,7 +82,7 @@ func jump(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
 		if eventTag, err := ParseEventTag(query); err == nil {
 			// Event
 			http.Redirect(w, req, server.NamedRoutes["event.view"].URL(
-				"year", strconv.Uitoa(eventTag.Year),
+				"year", strconv.FormatUint(uint64(eventTag.Year), 10),
 				"location", eventTag.LocationCode,
 			).String(), http.StatusFound)
 			return nil
@@ -109,7 +90,7 @@ func jump(server *Server, w http.ResponseWriter, req *http.Request) os.Error {
 
 		// TODO: other tags
 	}
-	return server.TemplateSet().Execute(w, "jump.html", map[string]interface{}{
+	return server.Templates().ExecuteTemplate(w, "jump.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
 		"Query":   query,

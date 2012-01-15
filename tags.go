@@ -1,8 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"os"
+
 	"strconv"
 )
 
@@ -23,7 +24,7 @@ type EventTag struct {
 	Year         uint
 }
 
-func ParseEventTag(s string) (tag EventTag, err os.Error) {
+func ParseEventTag(s string) (tag EventTag, err error) {
 	tag, s, err = parseEvent(s)
 	if err == nil && s != "" {
 		err = fmt.Errorf("Extra data at end of event tag: \"%s\"", s)
@@ -31,7 +32,7 @@ func ParseEventTag(s string) (tag EventTag, err os.Error) {
 	return
 }
 
-func parseEvent(s string) (tag EventTag, remaining string, err os.Error) {
+func parseEvent(s string) (tag EventTag, remaining string, err error) {
 	// Find the first digit
 	index := 0
 	for ; index < len(s); index++ {
@@ -43,7 +44,7 @@ func parseEvent(s string) (tag EventTag, remaining string, err os.Error) {
 	// Ensure location is found
 	tag.LocationCode = s[:index]
 	if tag.LocationCode == "" {
-		err = os.NewError("Tag must begin with a location code")
+		err = errors.New("Tag must begin with a location code")
 		return
 	}
 	remaining = s[index:]
@@ -53,10 +54,12 @@ func parseEvent(s string) (tag EventTag, remaining string, err os.Error) {
 		err = fmt.Errorf("%d-digit year must follow location code", yearWidth)
 		return
 	}
-	if tag.Year, err = strconv.Atoui(remaining[:yearWidth]); err != nil {
+	year64, err := strconv.ParseUint(remaining[:yearWidth], 10, 0)
+	if err != nil {
 		err = fmt.Errorf("%d-digit year must follow location code", yearWidth)
 		return
 	}
+	tag.Year = uint(year64)
 	remaining = remaining[yearWidth:]
 
 	return
@@ -76,7 +79,7 @@ type MatchTag struct {
 	MatchNumber uint
 }
 
-func ParseMatchTag(s string) (tag MatchTag, err os.Error) {
+func ParseMatchTag(s string) (tag MatchTag, err error) {
 	tag.EventTag, s, err = parseEvent(s)
 	if err != nil {
 		return
@@ -88,10 +91,10 @@ func ParseMatchTag(s string) (tag MatchTag, err os.Error) {
 	return
 }
 
-func parseMatch(s string) (matchType MatchType, matchNumber uint, remaining string, err os.Error) {
+func parseMatch(s string) (matchType MatchType, matchNumber uint, remaining string, err error) {
 	// Parse match type
 	if len(s) == 0 {
-		err = os.NewError("Missing one-digit match type")
+		err = errors.New("Missing one-digit match type")
 		return
 	}
 	digit, remaining := s[0], s[1:]
@@ -105,7 +108,7 @@ func parseMatch(s string) (matchType MatchType, matchNumber uint, remaining stri
 	case finalDigit:
 		matchType = Final
 	default:
-		err = os.NewError("Match type must be 0, 1, 2, or 3")
+		err = errors.New("Match type must be 0, 1, 2, or 3")
 		return
 	}
 
@@ -115,11 +118,12 @@ func parseMatch(s string) (matchType MatchType, matchNumber uint, remaining stri
 		return
 	}
 	matchNumberString, remaining := remaining[:matchNumberWidth], remaining[matchNumberWidth:]
-	matchNumber, err2 := strconv.Atoui(matchNumberString)
+	matchNumber64, err2 := strconv.ParseUint(matchNumberString, 10, 0)
 	if err2 != nil {
 		err = fmt.Errorf("Match number must be %d digits", matchNumberWidth)
 		return
 	}
+	matchNumber = uint(matchNumber64)
 
 	return
 }
@@ -151,7 +155,7 @@ type MatchTeamTag struct {
 	TeamNumber uint
 }
 
-func ParseMatchTeamTag(s string) (tag MatchTeamTag, err os.Error) {
+func ParseMatchTeamTag(s string) (tag MatchTeamTag, err error) {
 	tag.EventTag, s, err = parseEvent(s)
 	if err != nil {
 		return
@@ -160,10 +164,11 @@ func ParseMatchTeamTag(s string) (tag MatchTeamTag, err os.Error) {
 	if err != nil {
 		return
 	}
-	tag.TeamNumber, err = strconv.Atoui(s)
+	teamNumber64, err := strconv.ParseUint(s, 10, 0)
 	if err != nil {
 		err = fmt.Errorf("Extra data at end of match team tag: \"%s\"", s)
 	}
+	tag.TeamNumber = uint(teamNumber64)
 	return
 }
 
