@@ -37,7 +37,8 @@
                     <tr class="{{cycle $i "odd" "even"}}">
                         <td class="match">
                             {{with $match}}
-                            <a href="{{matchRoute "match.view" $.Event.Tag .Type .Number}}">{{.Type.DisplayName}} {{.Number}}</a>
+                            {{/*<a href="{{matchRoute "match.view" $.Event.Tag .Type .Number}}">{{.Type.DisplayName}} {{.Number}}</a>*/}}
+                            {{.Type.DisplayName}} {{.Number}}
                             {{end}}
                         </td>
                         {{template "alliance-info.html" $match.AllianceInfo "red"}}

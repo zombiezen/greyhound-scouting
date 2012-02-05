@@ -107,7 +107,7 @@ type Match struct {
 	Type   MatchType
 	Number int
 	Teams  []TeamInfo
-	Score  map[Alliance]int `bson:",omitempty"`
+	Score  map[string]int `bson:",omitempty"`
 }
 
 func (match *Match) AllianceInfo(alliance Alliance) AllianceInfo {
@@ -123,7 +123,7 @@ func (match *Match) AllianceInfo(alliance Alliance) AllianceInfo {
 	// Get alliance score
 	var score int
 	if match.Score != nil {
-		score = match.Score[alliance]
+		score = match.Score[string(alliance)]
 	}
 
 	// Create info struct
@@ -139,9 +139,9 @@ func (match *Match) Winner() Alliance {
 	switch {
 	case match.Score == nil:
 		return ""
-	case match.Score[Red] > match.Score[Blue]:
+	case match.Score[string(Red)] > match.Score[string(Blue)]:
 		return Red
-	case match.Score[Red] < match.Score[Blue]:
+	case match.Score[string(Red)] < match.Score[string(Blue)]:
 		return Blue
 	}
 	return ""
