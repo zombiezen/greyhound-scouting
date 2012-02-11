@@ -1,10 +1,9 @@
 package main
 
 import (
+	"code.google.com/p/gorilla/mux"
 	"net/http"
 	"strconv"
-
-	"code.google.com/p/gorilla/gorilla/mux"
 )
 
 func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) error {

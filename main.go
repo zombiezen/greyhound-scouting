@@ -1,14 +1,12 @@
 package main
 
 import (
+	"code.google.com/p/gorilla/mux"
 	"flag"
+	"launchpad.net/mgo"
 	"log"
 	"net/http"
 	"strconv"
-
-	"launchpad.net/mgo"
-
-	"code.google.com/p/gorilla/gorilla/mux"
 )
 
 const templatePrefix = "templates/"
@@ -39,17 +37,19 @@ func main() {
 		log.Fatalf("Could not load gopher: %v", err)
 	}
 
+	server.StrictSlash(true)
+
 	server.Handle("/", server.Handler(index)).Name("root")
 	server.Handle("/jump", server.Handler(jump)).Name("jump")
 
-	server.Handle("/team/", server.Handler(teamIndex)).Name("team.index").RedirectSlash(true)
-	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view").RedirectSlash(true)
+	server.Handle("/team/", server.Handler(teamIndex)).Name("team.index")
+	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view")
 
-	server.Handle("/event/", server.Handler(eventIndex)).Name("event.index").RedirectSlash(true)
-	server.Handle(eventURLPrefix, server.Handler(viewEvent)).Name("event.view").RedirectSlash(true)
+	server.Handle("/event/", server.Handler(eventIndex)).Name("event.index")
+	server.Handle(eventURLPrefix, server.Handler(viewEvent)).Name("event.view")
 	server.Handle(eventURLPrefix+"scout-forms.pdf", server.Handler(eventScoutForms)).Name("event.scoutForms")
 
-	server.Handle(matchURLPrefix, server.Handler(viewMatch)).Name("match.view").RedirectSlash(true)
+	server.Handle(matchURLPrefix, server.Handler(viewMatch)).Name("match.view")
 
 	staticServer := http.FileServer(http.Dir(*staticdir))
 	server.HandleFunc("/static{path:/.*}", func(w http.ResponseWriter, req *http.Request) {
@@ -75,16 +75,24 @@ func jump(server *Server, w http.ResponseWriter, req *http.Request) error {
 	if query != "" {
 		if _, err := strconv.Atoi(query); err == nil {
 			// Team number
-			http.Redirect(w, req, server.NamedRoutes["team.view"].URL("number", query).String(), http.StatusFound)
+			u, err := server.GetRoute("team.view").URL("number", query)
+			if err != nil {
+				return err
+			}
+			http.Redirect(w, req, u.String(), http.StatusFound)
 			return nil
 		}
 
 		if eventTag, err := ParseEventTag(query); err == nil {
 			// Event
-			http.Redirect(w, req, server.NamedRoutes["event.view"].URL(
+			u, err := server.GetRoute("event.view").URL(
 				"year", strconv.FormatUint(uint64(eventTag.Year), 10),
 				"location", eventTag.LocationCode,
-			).String(), http.StatusFound)
+			)
+			if err != nil {
+				return err
+			}
+			http.Redirect(w, req, u.String(), http.StatusFound)
 			return nil
 		}
 

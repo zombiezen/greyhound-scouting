@@ -2,10 +2,9 @@ package main
 
 import (
 	"errors"
-	"sort"
-
 	"launchpad.net/gobson/bson"
 	"launchpad.net/mgo"
+	"sort"
 )
 
 var StoreNotFound = errors.New("Not found in datastore")

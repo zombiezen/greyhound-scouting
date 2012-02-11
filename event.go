@@ -1,13 +1,11 @@
 package main
 
 import (
+	"bitbucket.org/zombiezen/gopdf/pdf"
+	"code.google.com/p/gorilla/mux"
 	"net/http"
 	"strconv"
 	"time"
-
-	"bitbucket.org/zombiezen/gopdf/pdf"
-
-	"code.google.com/p/gorilla/gorilla/mux"
 )
 
 func eventIndex(server *Server, w http.ResponseWriter, req *http.Request) error {
@@ -28,7 +26,7 @@ func eventIndex(server *Server, w http.ResponseWriter, req *http.Request) error 
 	})
 }
 
-func routeEventTag(vars mux.RouteVars) EventTag {
+func routeEventTag(vars map[string]string) EventTag {
 	year64, _ := strconv.ParseUint(vars["year"], 10, 0)
 	return EventTag{
 		Year:         uint(year64),
@@ -69,7 +67,7 @@ func viewEvent(server *Server, w http.ResponseWriter, req *http.Request) error {
 	})
 }
 
-func routeMatchTag(vars mux.RouteVars) MatchTag {
+func routeMatchTag(vars map[string]string) MatchTag {
 	num64, _ := strconv.ParseUint(vars["matchNumber"], 10, 0)
 	return MatchTag{
 		EventTag:    routeEventTag(vars),
