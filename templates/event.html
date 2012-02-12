@@ -77,7 +77,7 @@
                 <li><a href="{{print .Event.Date.Year|route "event.scoutForms" "location" .Event.Location.Code "year"}}">Scouting Forms</a></li>
                 {{/* TODO: Links */}}
                 <li><a href="#">Match Sheets</a></li>
-                <li><a href="#">Download as Spreadsheet</a></li>
+                <li><a href="{{print .Event.Date.Year|route "event.spreadsheet" "location" .Event.Location.Code "year"}}">Download as Spreadsheet</a></li>
             </ul>
 
             <h2>Links</h2>

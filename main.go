@@ -47,6 +47,7 @@ func main() {
 	eventRouter := eventRootRouter.PathPrefix("/{year:[1-9][0-9]*}/{location:[a-z]+}").Subrouter()
 	eventRouter.Handle("/", server.Handler(viewEvent)).Name("event.view")
 	eventRouter.Handle("/scout-forms.pdf", server.Handler(eventScoutForms)).Name("event.scoutForms")
+	eventRouter.Handle("/teams.csv", server.Handler(eventSpreadsheet)).Name("event.spreadsheet")
 
 	matchRouter := eventRouter.PathPrefix("/match/{matchType:qualification|quarter|semifinal|final}/{matchNumber:[1-9][0-9]*}").Subrouter()
 	matchRouter.Handle("/", server.Handler(viewMatch)).Name("match.view")

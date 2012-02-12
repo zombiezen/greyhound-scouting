@@ -3,6 +3,7 @@ package main
 import (
 	"bitbucket.org/zombiezen/gopdf/pdf"
 	"code.google.com/p/gorilla/mux"
+	"encoding/csv"
 	"net/http"
 	"strconv"
 	"time"
@@ -117,4 +118,39 @@ func eventScoutForms(server *Server, w http.ResponseWriter, req *http.Request) e
 	doc := pdf.New()
 	renderMultipleScoutForms(doc, pdf.USLetterWidth, pdf.USLetterHeight, event, matches)
 	return doc.Encode(w)
+}
+
+func eventSpreadsheet(server *Server, w http.ResponseWriter, req *http.Request) error {
+	vars := mux.Vars(req)
+
+	// Fetch event
+	event, err := server.Store().FetchEvent(routeEventTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Write header
+	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+	w.Header().Set("Content-Disposition", "attachment; filename=teams.csv")
+	cw := csv.NewWriter(w)
+	cw.Write([]string{
+		"Team #",
+		"Matches Played",
+		"No-Shows",
+	})
+
+	for _, teamNum := range event.Teams {
+		// TODO: Get team stats
+		cw.Write([]string{
+			strconv.Itoa(teamNum),
+			strconv.Itoa(0),
+			strconv.Itoa(0),
+		})
+	}
+
+	cw.Flush()
+	return nil
 }
