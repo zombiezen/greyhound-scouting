@@ -11,9 +11,6 @@ import (
 
 const templatePrefix = "templates/"
 
-const eventURLPrefix = "/event/{year:[1-9][0-9]*}/{location:[a-z]+}/"
-const matchURLPrefix = eventURLPrefix + "match/{matchType:qualification|quarter|semifinal|final}/{matchNumber:[1-9][0-9]*}/"
-
 func main() {
 	mongoURL := flag.String("mongo", "localhost", "The URL for the MongoDB instance")
 	database := flag.String("database", "scouting", "The database name in the MongoDB instance to use")
@@ -37,19 +34,22 @@ func main() {
 		log.Fatalf("Could not load gopher: %v", err)
 	}
 
-	server.StrictSlash(true)
-
 	server.Handle("/", server.Handler(index)).Name("root")
 	server.Handle("/jump", server.Handler(jump)).Name("jump")
 
-	server.Handle("/team/", server.Handler(teamIndex)).Name("team.index")
-	server.Handle("/team/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view")
+	teamRouter := server.PathPrefix("/team").Subrouter()
+	teamRouter.Handle("/", server.Handler(teamIndex)).Name("team.index")
+	teamRouter.Handle("/{number:[1-9][0-9]*}/", server.Handler(viewTeam)).Name("team.view")
 
-	server.Handle("/event/", server.Handler(eventIndex)).Name("event.index")
-	server.Handle(eventURLPrefix, server.Handler(viewEvent)).Name("event.view")
-	server.Handle(eventURLPrefix+"scout-forms.pdf", server.Handler(eventScoutForms)).Name("event.scoutForms")
+	eventRootRouter := server.PathPrefix("/event").Subrouter()
+	eventRootRouter.Handle("/", server.Handler(eventIndex)).Name("event.index")
 
-	server.Handle(matchURLPrefix, server.Handler(viewMatch)).Name("match.view")
+	eventRouter := eventRootRouter.PathPrefix("/{year:[1-9][0-9]*}/{location:[a-z]+}").Subrouter()
+	eventRouter.Handle("/", server.Handler(viewEvent)).Name("event.view")
+	eventRouter.Handle("/scout-forms.pdf", server.Handler(eventScoutForms)).Name("event.scoutForms")
+
+	matchRouter := eventRouter.PathPrefix("/match/{matchType:qualification|quarter|semifinal|final}/{matchNumber:[1-9][0-9]*}").Subrouter()
+	matchRouter.Handle("/", server.Handler(viewMatch)).Name("match.view")
 
 	staticServer := http.FileServer(http.Dir(*staticdir))
 	server.HandleFunc("/static{path:/.*}", func(w http.ResponseWriter, req *http.Request) {
