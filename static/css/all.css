@@ -1,0 +1,190 @@
+/*
+ *  reset.css
+ *  PROJECT
+ *
+ *  Created by Ross Light on DATE.
+ */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none;
+  -webkit-padding-start: 0; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after, q:before, q:after {
+  content: '';
+  content: none; }
+
+/* remember to define focus styles! */
+:focus {
+  outline: 0; }
+
+/* remember to highlight inserts somehow! */
+ins {
+  text-decoration: none; }
+
+del {
+  text-decoration: line-through; }
+
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+a img, :link img, :visited img {
+  border: none; }
+
+/*
+ *  layout.css
+ *  scouting
+ *
+ *  Created by Ross Light on 1/12/11.
+ */
+header {
+  position: relative;
+  padding: 1ex 1ex; }
+  header > nav {
+    position: absolute;
+    bottom: 0.5ex;
+    right: 5em; }
+
+@media print {
+  header > nav {
+    display: none; } }
+
+#main {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: relative;
+  width: 90%;
+  margin: 1.5em auto;
+  padding: 0 1em 1em; }
+
+footer {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 50%;
+  margin: 0 auto;
+  padding: 1ex 1em; }
+
+/*
+ *  style.css
+ *  scouting
+ *
+ *  Created by Ross Light on 1/12/11.
+ */
+html, body {
+  background: black;
+  font-family: Tahoma, Helvetica, Arial, sans-serif; }
+
+header {
+  background: #E09C2D; }
+  header > h1 {
+    margin: 0;
+    font-size: 200%;
+    text-transform: uppercase; }
+  header > nav {
+    font-size: 110%; }
+    header > nav a {
+      font-weight: bold; }
+    header > nav a:before {
+      content: "\2022";
+      margin-left: 1ex;
+      margin-right: 1ex; }
+  header :link, header :visited, header :hover {
+    color: inherit;
+    text-decoration: none; }
+
+#jumpbar_form {
+  display: inline; }
+
+#main {
+  background: #e8dac3;
+  border: thin solid black; }
+
+#content_area p {
+  margin-bottom: 1em; }
+
+.team_list .team_number {
+  text-align: right;
+  font-weight: bold; }
+
+@media screen {
+  #robot_info {
+    position: absolute;
+    left: 50%;
+    float: right;
+    margin-left: 2em; } }
+
+.listing .odd .red_alliance {
+  background: #ee707f; }
+.listing .odd .blue_alliance {
+  background: #bcbfe4; }
+.listing .score.winner {
+  font-weight: bold; }
+.listing .team_highlight {
+  font-weight: bold; }
+
+#match_teams {
+  border: thin solid #333;
+  font-size: 125%; }
+  #match_teams td, #match_teams th {
+    padding: 0.5ex 1ex; }
+  #match_teams > thead > th {
+    width: 50%; }
+  #match_teams td {
+    width: 25%; }
+  #match_teams .team_header {
+    border-top: thin solid #333;
+    border-bottom: thin solid #333;
+    text-align: left; }
+    #match_teams .team_header > th.red_alliance {
+      background: #ee707f; }
+    #match_teams .team_header > th.blue_alliance {
+      background: #bcbfe4; }
+
+td.red_alliance, th.red_alliance {
+  background: #b01527; }
+  td.red_alliance :link, td.red_alliance :visited, td.red_alliance a:hover, th.red_alliance :link, th.red_alliance :visited, th.red_alliance a:hover {
+    color: inherit; }
+
+td.blue_alliance, th.blue_alliance {
+  background: #4f57b8; }
+  td.blue_alliance :link, td.blue_alliance :visited, td.blue_alliance a:hover, th.blue_alliance :link, th.blue_alliance :visited, th.blue_alliance a:hover {
+    color: inherit; }
+
+.formtable th.red_alliance, .formtable th.blue_alliance {
+  text-align: left;
+  padding-bottom: 1ex; }
+
+#score {
+  margin-bottom: 1ex;
+  font-size: 150%; }
+
+#main_jumpbar_form input {
+  font-size: 150%; }
+
+h1.red_alliance, h2.red_alliance, span.red_alliance, div.red_alliance {
+  color: #b01527; }
+h1.blue_alliance, h2.blue_alliance, span.blue_alliance, div.blue_alliance {
+  color: #4f57b8; }
+
+footer {
+  background: #e8dac3;
+  border: thin solid black;
+  text-align: center;
+  font-size: 80%; }

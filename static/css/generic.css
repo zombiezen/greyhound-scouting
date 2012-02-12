@@ -1,0 +1,137 @@
+/*
+ *  generic.css
+ *  scouting
+ *
+ *  Created by Ross Light on 1/12/11.
+ */
+/*** FORMS ***/
+.formtable th {
+  text-align: right;
+  vertical-align: top; }
+
+.formtable td {
+  padding-bottom: 1ex; }
+
+.formtable .actions {
+  text-align: right; }
+
+.formtable .actions > * {
+  margin-left: 1ex; }
+
+.error, .errorlist {
+  margin: 0 0 1ex;
+  padding: 0 1ex;
+  border: thin solid red;
+  background: #fcc; }
+
+p.error {
+  width: 50%; }
+
+.errorlist {
+  list-style: none; }
+
+.explanation {
+  color: #333;
+  font-size: 85%;
+  font-style: italic; }
+
+/*** PAGING ***/
+.pager {
+  margin-top: 1em;
+  margin-bottom: 1ex; }
+
+.pager :link, .pager :visited {
+  color: #a65616; }
+
+.pager .disabled {
+  color: #888; }
+
+.pager .control > :link, .pager .control > :visited, .pager .control > .disabled {
+  margin-right: 1ex; }
+
+/*** TABLES ***/
+table.info {
+  margin-bottom: 1em; }
+  table.info th, table.info td {
+    line-height: 1.2em; }
+  table.info th {
+    text-align: right;
+    vertical-align: top;
+    font-weight: bold; }
+  table.info td {
+    padding-left: 1ex; }
+
+.listing th, .listing td {
+  padding: 0.5ex 1ex;
+  text-align: left; }
+.listing tr.odd {
+  background: #e8dac3; }
+.listing tr.even {
+  background: #ccad79; }
+.listing thead > tr {
+  background: #be9654; }
+
+/*** LINKS ***/
+:link {
+  color: #a65616; }
+
+:visited {
+  color: #5c3830; }
+
+a:hover {
+  color: #d9582e; }
+
+/*** HEADERS ***/
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 20px;
+  margin-bottom: 20px; }
+  h1 :link, h1 :visited, h2 :link, h2 :visited, h3 :link, h3 :visited, h4 :link, h4 :visited, h5 :link, h5 :visited, h6 :link, h6 :visited {
+    text-decoration: none; }
+
+h1 {
+  font-size: 175%; }
+
+h2 {
+  font-size: 150%; }
+
+h3 {
+  font-size: 125%; }
+
+h4 {
+  font-size: 112.5%; }
+
+h5, h6 {
+  font-size: 100%; }
+
+hgroup {
+  margin-top: 2%;
+  margin-bottom: 2%; }
+  hgroup > h1, hgroup > h2, hgroup > h3, hgroup > h4, hgroup > h5, hgroup > h6 {
+    margin-top: 0;
+    margin-bottom: 0; }
+
+/*** MISC ***/
+.clear {
+  clear: both;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0; }
+
+.nodata {
+  color: #444;
+  font-style: italic; }
+
+/*** DOCUMENTS ***/
+.copy ul {
+  margin-left: 1.5em;
+  list-style: square; }
+.copy ol {
+  margin-left: 2em;
+  list-style: decimal; }
+.copy dl > dt {
+  margin-bottom: 0.5ex;
+  font-weight: bold; }
+.copy dl > dd {
+  margin-left: 3em;
+  margin-bottom: 0.5em; }

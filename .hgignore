@@ -1,6 +1,5 @@
 ^scouting$
 ^_testmain\.go$
-^static/css/.*\.css$
 syntax:glob
 *.[oa]
 *.[586]
