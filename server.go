@@ -26,9 +26,7 @@ func NewServer(store Datastore) *Server {
 		Debug:     true,
 	}
 	server.templates.Funcs(template.FuncMap{
-		"route":      server.routeFunc(),
-		"eventRoute": server.eventRouteFunc(),
-		"matchRoute": server.matchRouteFunc(),
+		"route": server.routeFunc(),
 		"cycle": func(i int, vals ...interface{}) interface{} {
 			return vals[i%len(vals)]
 		},
@@ -76,53 +74,19 @@ func (server *Server) logError(req *http.Request, err error) {
 	log.Print(&b)
 }
 
-func (server *Server) routeFunc() func(string, ...string) (template.URL, error) {
-	return func(name string, pairs ...string) (template.URL, error) {
+func (server *Server) routeFunc() func(string, ...interface{}) (template.URL, error) {
+	return func(name string, pairs ...interface{}) (template.URL, error) {
 		route := server.GetRoute(name)
 		if route == nil {
 			return "", fmt.Errorf("Could not resolve route %q", name)
 		}
-		url, err := route.URL(pairs...)
+		stringPairs := make([]string, len(pairs))
+		for i := range pairs {
+			stringPairs[i] = fmt.Sprint(pairs[i])
+		}
+		url, err := route.URL(stringPairs...)
 		if err != nil {
 			return "", fmt.Errorf("Bad set of pairs for route %q: %v (%v)", name, pairs, err)
-		}
-		return template.URL(url.String()), nil
-	}
-}
-
-func (server *Server) eventRouteFunc() func(string, EventTag, ...string) (template.URL, error) {
-	return func(name string, tag EventTag, pairs ...string) (template.URL, error) {
-		route := server.GetRoute(name)
-		if route == nil {
-			return "", fmt.Errorf("Could not resolve route %q", name)
-		}
-		args := make([]string, 0, len(pairs)+4)
-		args = append(args, "year", fmt.Sprint(tag.Year))
-		args = append(args, "location", tag.LocationCode)
-		args = append(args, pairs...)
-		url, err := route.URL(args...)
-		if err != nil {
-			return "", fmt.Errorf("Bad set of pairs for event route %q: %v (%v)", name, pairs, err)
-		}
-		return template.URL(url.String()), nil
-	}
-}
-
-func (server *Server) matchRouteFunc() func(string, EventTag, MatchType, int, ...string) (template.URL, error) {
-	return func(name string, tag EventTag, matchType MatchType, matchNum int, pairs ...string) (template.URL, error) {
-		route := server.GetRoute(name)
-		if route == nil {
-			return "", fmt.Errorf("Could not resolve route %q", name)
-		}
-		args := make([]string, 0, len(pairs)+8)
-		args = append(args, "year", fmt.Sprint(tag.Year))
-		args = append(args, "location", tag.LocationCode)
-		args = append(args, "matchType", string(matchType))
-		args = append(args, "matchNumber", fmt.Sprint(matchNum))
-		args = append(args, pairs...)
-		url, err := route.URL(args...)
-		if err != nil {
-			return "", fmt.Errorf("Bad set of pairs for match route %q: %v (%v)", name, pairs, err)
 		}
 		return template.URL(url.String()), nil
 	}

@@ -37,7 +37,7 @@
                     <tr class="{{cycle $i "odd" "even"}}">
                         <td class="match">
                             {{with $match}}
-                            <a href="{{matchRoute "match.view" $.Event.Tag .Type .Number}}">{{.Type.DisplayName}} {{.Number}}</a>
+                            <a href="{{route "match.view" "year" $.Event.Date.Year "location" $.Event.Location.Code "matchType" .Type "matchNumber" .Number}}">{{.Type.DisplayName}} {{.Number}}</a>
                             {{end}}
                         </td>
                         {{template "alliance-info.html" $match.AllianceInfo "red"}}
@@ -60,7 +60,7 @@
                 <tbody>
                     {{range $i, $team := .Teams}}
                     <tr class="{{cycle $i "odd" "even"}}">
-                        {{with $teamURL := print .Number|route "team.view" "number"}}{{with $team}}
+                        {{with $teamURL := route "team.view" "number" .Number}}{{with $team}}
                         <td class="team_number"><a href="{{$teamURL}}">{{.Number}}</a></td>
                         <td class="team_name">{{with .Name}}<a href="{{$teamURL}}">{{.}}</a>{{end}}</td>
                         <td class="robot_name">{{with .Robot.Name}}<a href="{{$teamURL}}#robot">{{.}}</a>{{end}}</td>
@@ -74,10 +74,10 @@
 
             <h2>Reports</h2>
             <ul>
-                <li><a href="{{print .Event.Date.Year|route "event.scoutForms" "location" .Event.Location.Code "year"}}">Scouting Forms</a></li>
+                <li><a href="{{route "event.scoutForms" "location" .Event.Location.Code "year" .Event.Date.Year}}">Scouting Forms</a></li>
                 {{/* TODO: Links */}}
                 <li><a href="#">Match Sheets</a></li>
-                <li><a href="{{print .Event.Date.Year|route "event.spreadsheet" "location" .Event.Location.Code "year"}}">Download as Spreadsheet</a></li>
+                <li><a href="{{route "event.spreadsheet" "location" .Event.Location.Code "year" .Event.Date.Year}}">Download as Spreadsheet</a></li>
             </ul>
 
             <h2>Links</h2>
@@ -102,7 +102,7 @@
 {{define "alliance-info.html"}}
     <td class="{{.Alliance}}_alliance{{if .Won}} winner{{end}}">
         {{range .Teams}}
-            {{with .Team}}<a href="{{print .|route "team.view" "number"}}">{{.}}</a>{{end}}
+            {{with .Team}}<a href="{{route "team.view" "number" .}}">{{.}}</a>{{end}}
             {{/* TODO: Add commas */}}
         {{end}}
     </td>

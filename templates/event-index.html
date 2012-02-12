@@ -33,7 +33,7 @@
                 </thead>
                 <tbody>
                     {{range $i, $event := .EventList}}
-                    {{with $eventURL := print .Date.Year | route "event.view" "location" .Location.Code "year" }}
+                    {{with $eventURL := route "event.view" "location" .Location.Code "year" .Date.Year }}
                     <tr class="{{cycle $i "odd" "even"}}">
                         {{with $event}}
                         <td class="event_name"><a href="{{$eventURL}}">{{.Location.Name}}</a></td>
