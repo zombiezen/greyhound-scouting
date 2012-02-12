@@ -80,6 +80,15 @@ func routeMatchTag(vars map[string]string) MatchTag {
 func viewMatch(server *Server, w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 
+	// Fetch event
+	event, err := server.Store().FetchEvent(routeEventTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
 	// Fetch match
 	match, err := server.Store().FetchMatch(routeMatchTag(vars))
 	if err == StoreNotFound {
@@ -92,6 +101,7 @@ func viewMatch(server *Server, w http.ResponseWriter, req *http.Request) error {
 	return server.Templates().ExecuteTemplate(w, "match.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
+		"Event":   event,
 		"Match":   match,
 	})
 }

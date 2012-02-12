@@ -1,7 +1,7 @@
 {{template "doctype.html"}}
 <html>
 <head>
-    {{with .Match}}<title>{{/* TODO: Event */}} {{.Type.DisplayName}} Match {{.Number}}</title>{{end}}
+    <title>{{.Event.Location.Name}} {{with .Match}}{{.Type.DisplayName}} Match {{.Number}}{{end}}</title>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     {{template "css.html"}}
 </head>
@@ -19,7 +19,10 @@
     <div id="main">
         <div id="content_area">
             <!-- begin content -->
-            {{with .Match}}<h1>{{/* TODO: Event */}} {{.Type.DisplayName}} Match {{.Number}}</h1>{{end}}
+            <hgroup>
+                <h1>{{with .Match}}{{.Type.DisplayName}} Match {{.Number}}{{end}}</h1>
+                <h2>{{with .Event}}<a href="{{route "event.view" "year" .Date.Year "location" .Location.Code}}">{{.Location.Name}} ({{.Date.Year}})</a>{{end}}</h2>
+            </hgroup>
 
             {{/* TODO: Video */}}
 
