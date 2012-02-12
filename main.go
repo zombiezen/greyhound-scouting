@@ -11,29 +11,56 @@ import (
 
 const templatePrefix = "templates/"
 
-func main() {
-	mongoURL := flag.String("mongo", "localhost", "The URL for the MongoDB instance")
-	database := flag.String("database", "scouting", "The database name in the MongoDB instance to use")
-	address := flag.String("address", ":8080", "The address to listen for connections")
-	staticdir := flag.String("staticdir", "static", "The directory to serve static files from")
-	debug := flag.Bool("debug", false, "Display extra information in-browser about the program")
-	flag.Parse()
+var server *Server
 
-	session, err := mgo.Mongo(*mongoURL)
+// Flags
+var (
+	mongoURL  string
+	database  string
+	address   string
+	staticdir string
+	debug     bool
+)
+
+func main() {
+	parseFlags()
+	createServer()
+	parseTemplates()
+	addRoutes()
+
+	log.Printf("Listening on %s", address)
+	http.ListenAndServe(address, Logger{server})
+}
+
+func parseFlags() {
+	flag.StringVar(&mongoURL, "mongo", "localhost", "The URL for the MongoDB instance")
+	flag.StringVar(&database, "database", "scouting", "The database name in the MongoDB instance to use")
+	flag.StringVar(&address, "address", ":8080", "The address to listen for connections")
+	flag.StringVar(&staticdir, "staticdir", "static", "The directory to serve static files from")
+	flag.BoolVar(&debug, "debug", false, "Display extra information in-browser about the program")
+	flag.Parse()
+}
+
+func createServer() {
+	session, err := mgo.Mongo(mongoURL)
 	if err != nil {
 		log.Fatalf("Could not connect to database: %v", err)
 	}
 
-	server := NewServer(mongoDatastore{session.DB(*database)})
-	server.Debug = *debug
+	server = NewServer(mongoDatastore{session.DB(database)})
+	server.Debug = debug
+}
 
+func parseTemplates() {
 	if _, err := server.Templates().ParseGlob(templatePrefix + "*.html"); err != nil {
 		log.Fatalf("Could not load templates: %v", err)
 	}
 	if _, err := server.Templates().ParseFiles(templatePrefix + "gopher"); err != nil {
 		log.Fatalf("Could not load gopher: %v", err)
 	}
+}
 
+func addRoutes() {
 	server.Handle("/", server.Handler(index)).Name("root")
 	server.Handle("/jump", server.Handler(jump)).Name("jump")
 
@@ -52,15 +79,12 @@ func main() {
 	matchRouter := eventRouter.PathPrefix("/match/{matchType:qualification|quarter|semifinal|final}/{matchNumber:[1-9][0-9]*}").Subrouter()
 	matchRouter.Handle("/", server.Handler(viewMatch)).Name("match.view")
 
-	staticServer := http.FileServer(http.Dir(*staticdir))
+	staticServer := http.FileServer(http.Dir(staticdir))
 	server.HandleFunc("/static{path:/.*}", func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)
 		req.URL.Path = "/" + vars["path"]
 		staticServer.ServeHTTP(w, req)
 	}).Name("static")
-
-	log.Printf("Listening on %s", *address)
-	http.ListenAndServe(*address, Logger{server})
 }
 
 func index(server *Server, w http.ResponseWriter, req *http.Request) error {
