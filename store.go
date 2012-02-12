@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"launchpad.net/gobson/bson"
 	"launchpad.net/mgo"
+	"launchpad.net/mgo/bson"
 	"sort"
 )
 
@@ -28,7 +28,7 @@ const (
 
 // mongoDatastore persists model objects using MongoDB.
 type mongoDatastore struct {
-	mgo.Database
+	*mgo.Database
 }
 
 func (store mongoDatastore) Teams() Pager {

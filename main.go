@@ -42,7 +42,7 @@ func parseFlags() {
 }
 
 func createServer() {
-	session, err := mgo.Mongo(mongoURL)
+	session, err := mgo.Dial(mongoURL)
 	if err != nil {
 		log.Fatalf("Could not connect to database: %v", err)
 	}
