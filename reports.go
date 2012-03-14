@@ -11,9 +11,6 @@ const (
 	matchNumberFontName = pdf.HelveticaBold
 	matchNumberFontSize = 18
 
-	allianceFontName = pdf.Helvetica
-	allianceFontSize = 16
-
 	scoreFontName = pdf.Helvetica
 	scoreFontSize = 14
 
@@ -37,7 +34,7 @@ func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight pdf.Unit,
 		for _, info := range teamList {
 			if canvas == nil {
 				canvas = doc.NewPage(pageWidth, pageHeight)
-				canvas.Translate(reportMargin, pageHeight-pageHeight/scoutFormsPerPage-reportMargin)
+				canvas.Translate(reportMargin, pageHeight-sizeY-reportMargin)
 			}
 			renderScoutForm(canvas, sizeX, sizeY, event, match, info.Team)
 			if n%scoutFormsPerPage == scoutFormsPerPage-1 {
@@ -91,26 +88,45 @@ func renderScoutForm(canvas *pdf.Canvas, w, h pdf.Unit, event *Event, match *Mat
 	canvas.DrawText(text)
 	canvas.Pop()
 
-	// Alliance
-	baseline += text.Y() - 0.25*pdf.Inch - allianceFontSize
-	renderFields(
-		canvas, pdf.Point{0, baseline},
-		allianceFontName, allianceFontSize,
-		scoutFormAllianceLine,
-		fmt.Sprintf("%s Alliance Score:", alliance.DisplayName()),
-	)
-
 	// Scores
-	baseline -= scoreFontSize + 0.25*pdf.Inch
-	formPt1 := renderFields(canvas, pdf.Point{0, baseline}, pdf.Helvetica, scoreFontSize, 1.0*pdf.Inch, "High:", "Middle:", "Low:")
-	formPt2 := renderFields(canvas, pdf.Point{formPt1.X + 0.25*pdf.Inch, baseline}, pdf.Helvetica, scoreFontSize, 0.75*pdf.Inch, "Ubertube (H/M/L/X):", "Minibot Rank:")
-	formPt3 := renderFields(canvas, pdf.Point{formPt2.X + 0.5*pdf.Inch, baseline}, pdf.Helvetica, scoreFontSize, 0.75*pdf.Inch, "Failure:", "No-Show:")
-	_ = formPt3
+	headingBaseline := baseline + text.Y() - 0.25*pdf.Inch - scoreFontSize
+	baseline = headingBaseline - 0.1*pdf.Inch - scoreFontSize
+	formPt1 := renderFields(canvas, pdf.Point{0, baseline}, pdf.Helvetica, scoreFontSize, 0.5*pdf.Inch, "High:", "Mid:", "Low:")
+	formPt2 := renderFields(canvas, pdf.Point{formPt1.X + 0.25*pdf.Inch, baseline}, pdf.Helvetica, scoreFontSize, 0.5*pdf.Inch, "High", "Mid:", "Low:")
+	formPt3 := renderFields(canvas, pdf.Point{formPt2.X + 0.5*pdf.Inch, baseline}, pdf.Helvetica, scoreFontSize, 0.5*pdf.Inch, "Coop Attempt:", "Bridge 1 Attempt:", "Bridge 2 Attempt:")
+	formPt4 := renderFields(canvas, pdf.Point{formPt3.X + 0.25*pdf.Inch, baseline}, pdf.Helvetica, scoreFontSize, 0.5*pdf.Inch, "Success:", "Success:", "Success:")
+	_ = formPt4
+
+	canvas.Push()
+	canvas.Translate(0, headingBaseline)
+	text = new(pdf.Text)
+	text.SetFont(pdf.HelveticaBold, scoreFontSize)
+	text.Text("Autonomous")
+	canvas.DrawText(text)
+	canvas.Pop()
+
+	canvas.Push()
+	canvas.Translate(formPt1.X+0.25*pdf.Inch, headingBaseline)
+	text = new(pdf.Text)
+	text.SetFont(pdf.HelveticaBold, scoreFontSize)
+	text.Text("Teleop")
+	canvas.DrawText(text)
+	canvas.Pop()
 
 	// Scout name
 	// TODO: don't assume formPt1.Y is the lowest
 	baseline += formPt1.Y - (scoreFontSize + 0.4*pdf.Inch)
-	renderFields(canvas, pdf.Point{0, baseline}, pdf.Helvetica, scoreFontSize, 3.0*pdf.Inch, "Scout Name:")
+	namePt := renderFields(canvas, pdf.Point{0, baseline}, pdf.Helvetica, scoreFontSize, 3.0*pdf.Inch, "Scout Name:")
+
+	// Comments
+	baseline += namePt.Y - (scoreFontSize + 0.05*pdf.Inch)
+	canvas.Push()
+	canvas.Translate(0, baseline)
+	text = new(pdf.Text)
+	text.SetFont(pdf.Helvetica, scoreFontSize)
+	text.Text("Comments:")
+	canvas.DrawText(text)
+	canvas.Pop()
 }
 
 const (
