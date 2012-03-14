@@ -63,7 +63,6 @@ header {
 @media print {
   header > nav {
     display: none; } }
-
 #main {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -129,7 +128,6 @@ header {
     left: 50%;
     float: right;
     margin-left: 2em; } }
-
 .listing .odd .red_alliance {
   background: #ee707f; }
 .listing .odd .blue_alliance {

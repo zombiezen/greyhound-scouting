@@ -15,7 +15,6 @@ header {
 @media print {
   header > nav {
     display: none; } }
-
 #main {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
