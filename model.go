@@ -13,7 +13,6 @@ type Team struct {
 
 type Robot struct {
 	Name  string
-	Image string
 	Notes string `bson:",omitempty"`
 }
 
@@ -165,12 +164,62 @@ func (slice byMatchOrder) Less(i, j int) bool {
 }
 
 type TeamInfo struct {
-	Team      int
-	Alliance  Alliance
-	Score     int
-	ScoutName string `bson:"scout"`
-	Failure   bool
-	NoShow    bool
+	Team     int
+	Alliance Alliance
+	Score    int
+
+	ScoutName    string `bson:"scout"`
+	Autonomous   HoopCount
+	Teleoperated HoopCount
+	CoopBridge   Bridge
+	TeamBridge1  Bridge
+	TeamBridge2  Bridge
+
+	// These currently won't be used.
+	Failure bool
+	NoShow  bool
+}
+
+// HoopCount stores how many hoops were scored per robot per phase.
+type HoopCount struct {
+	High int
+	Mid  int
+	Low  int
+}
+
+// score returns the score for a hoop count for the high, mid, and low score multipliers.
+func (h HoopCount) score(high, mid, low int) int {
+	return h.High*high + h.Mid*mid + h.Low*low
+}
+
+// Bridge stores a match bridge attempt.
+type Bridge struct {
+	Attempted bool
+	Success   bool
+}
+
+// CalculateScore computes a team's score.
+func CalculateScore(auto, teleop HoopCount, coop, bridge1, bridge2 Bridge) int {
+	const (
+		teleopHighPoints = 3
+		teleopMidPoints  = 2
+		teleopLowPoints  = 1
+
+		autoHighPoints = teleopHighPoints + 3
+		autoMidPoints  = teleopMidPoints + 3
+		autoLowPoints  = teleopLowPoints + 3
+
+		bridgePoints = 10
+	)
+
+	autoScore := auto.score(autoHighPoints, autoMidPoints, autoLowPoints)
+	teleopScore := teleop.score(teleopHighPoints, teleopMidPoints, teleopLowPoints)
+	bridgeScore := 0
+	if bridge1.Success {
+		bridgeScore += bridgePoints
+	}
+
+	return autoScore + teleopScore + bridgeScore
 }
 
 type byTeamNumber []TeamInfo
