@@ -152,12 +152,6 @@ func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) err
 	}
 
 	// Parse forms
-	form.Autonomous = teamInfo.Autonomous
-	form.Teleoperated = teamInfo.Teleoperated
-	form.CoopBridge = teamInfo.CoopBridge
-	form.TeamBridge1 = teamInfo.TeamBridge1
-	form.TeamBridge2 = teamInfo.TeamBridge2
-	form.ScoutName = teamInfo.ScoutName
 	if req.Method == "POST" {
 		if err := req.ParseForm(); err != nil {
 			// TODO: Bad request status code
@@ -188,6 +182,13 @@ func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) err
 		}
 		http.Redirect(w, req, u.String(), http.StatusFound)
 		return nil
+	} else {
+		form.Autonomous = teamInfo.Autonomous
+		form.Teleoperated = teamInfo.Teleoperated
+		form.CoopBridge = teamInfo.CoopBridge
+		form.TeamBridge1 = teamInfo.TeamBridge1
+		form.TeamBridge2 = teamInfo.TeamBridge2
+		form.ScoutName = teamInfo.ScoutName
 	}
 
 	return server.Templates().ExecuteTemplate(w, "match-edit-team.html", map[string]interface{}{
