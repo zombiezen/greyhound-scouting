@@ -23,6 +23,8 @@ type Datastore interface {
 	EventsForTeam(year int, number int) ([]EventTag, error)
 
 	TeamEventStats(EventTag, int) (TeamStats, error)
+
+	UpdateMatchTeam(MatchTag, int, TeamInfo) error
 }
 
 const (
@@ -153,4 +155,11 @@ func (store mongoDatastore) TeamEventStats(tag EventTag, number int) (TeamStats,
 		stats.TeleoperatedHoops.Add(match.Teams[i].Teleoperated)
 	}
 	return stats, iter.Err()
+}
+
+func (store mongoDatastore) UpdateMatchTeam(tag MatchTag, teamNumber int, info TeamInfo) error {
+	return store.C(matchCollection(tag.EventTag)).Update(
+		bson.M{"type": tag.MatchType, "number": tag.MatchNumber, "teams.team": teamNumber},
+		bson.M{"$set": bson.M{"teams.$": info}},
+	)
 }

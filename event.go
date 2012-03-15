@@ -3,6 +3,7 @@ package main
 import (
 	"bitbucket.org/zombiezen/gopdf/pdf"
 	"code.google.com/p/gorilla/mux"
+	"code.google.com/p/gorilla/schema"
 	"encoding/csv"
 	"net/http"
 	"strconv"
@@ -103,6 +104,99 @@ func viewMatch(server *Server, w http.ResponseWriter, req *http.Request) error {
 		"Request": req,
 		"Event":   event,
 		"Match":   match,
+	})
+}
+
+func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) error {
+	vars := mux.Vars(req)
+
+	var form struct {
+		Autonomous   HoopCount
+		Teleoperated HoopCount
+		CoopBridge   Bridge
+		TeamBridge1  Bridge
+		TeamBridge2  Bridge
+		ScoutName    string
+	}
+
+	// Fetch event
+	event, err := server.Store().FetchEvent(routeEventTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Fetch match
+	match, err := server.Store().FetchMatch(routeMatchTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Get team info
+	teamNumber, _ := strconv.Atoi(vars["teamNumber"])
+	var teamInfo *TeamInfo
+	for i := range match.Teams {
+		if match.Teams[i].Team == teamNumber {
+			teamInfo = &match.Teams[i]
+			break
+		}
+	}
+	if teamInfo == nil {
+		http.NotFound(w, req)
+		return nil
+	}
+
+	// Parse forms
+	form.Autonomous = teamInfo.Autonomous
+	form.Teleoperated = teamInfo.Teleoperated
+	form.CoopBridge = teamInfo.CoopBridge
+	form.TeamBridge1 = teamInfo.TeamBridge1
+	form.TeamBridge2 = teamInfo.TeamBridge2
+	form.ScoutName = teamInfo.ScoutName
+	if req.Method == "POST" {
+		if err := req.ParseForm(); err != nil {
+			// TODO: Bad request status code
+			return err
+		}
+
+		d := schema.NewDecoder()
+		if err := d.Decode(&form, req.Form); err != nil {
+			return err
+		}
+		// TODO: Show errors in validation
+
+		// Save
+		teamInfo.Autonomous = form.Autonomous
+		teamInfo.Teleoperated = form.Teleoperated
+		teamInfo.CoopBridge = form.CoopBridge
+		teamInfo.TeamBridge1 = form.TeamBridge1
+		teamInfo.TeamBridge2 = form.TeamBridge2
+		teamInfo.ScoutName = form.ScoutName
+		if err := server.Store().UpdateMatchTeam(MatchTag{event.Tag(), match.Type, uint(match.Number)}, teamNumber, *teamInfo); err != nil {
+			return err
+		}
+
+		// Redirect
+		u, err := server.GetRoute("match.view").URL("year", strconv.Itoa(event.Date.Year), "location", event.Location.Code, "matchType", string(match.Type), "matchNumber", strconv.Itoa(match.Number))
+		if err != nil {
+			return err
+		}
+		http.Redirect(w, req, u.String(), http.StatusFound)
+		return nil
+	}
+
+	return server.Templates().ExecuteTemplate(w, "match-edit-team.html", map[string]interface{}{
+		"Server":   server,
+		"Request":  req,
+		"Event":    event,
+		"Match":    match,
+		"TeamInfo": teamInfo,
+		"Form":     form,
 	})
 }
 
