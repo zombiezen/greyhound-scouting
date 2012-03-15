@@ -1,0 +1,126 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    <title>Editing {{with .Match}}{{.Type.DisplayName}} Match {{.Number}}{{end}}</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        {{template "logo.html"}}
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+                {{/* TODO: edit match link */}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            <hgroup>
+                <h1>{{with .Match}}{{.Type.DisplayName}} Match {{.Number}}{{end}}</h1>
+                <h2><a href="{{route "team.view" "number" .TeamInfo.Team}}">Team {{.TeamInfo.Team}}</a></h2>
+                <h2>{{with .Event}}<a href="{{route "event.view" "year" .Date.Year "location" .Location.Code}}">{{.Location.Name}} ({{.Date.Year}})</a>{{end}}</h2>
+            </hgroup>
+
+            {{with .Form}}
+            <form method="POST">
+                <table class="formtable">
+                    <tr>
+                        <th>Autonomous High:</th>
+                        <td>
+                            <input name="Autonomous.High" type="text" value="{{.Autonomous.High}}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Autonomous Mid:</th>
+                        <td>
+                            <input name="Autonomous.Mid" type="text" value="{{.Autonomous.Mid}}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Autonomous Low:</th>
+                        <td>
+                            <input name="Autonomous.Low" type="text" value="{{.Autonomous.Low}}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Teleoperated High:</th>
+                        <td>
+                            <input name="Teleoperated.High" type="text" value="{{.Teleoperated.High}}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Teleoperated Mid:</th>
+                        <td>
+                            <input name="Teleoperated.Mid" type="text" value="{{.Teleoperated.Mid}}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Teleoperated Low:</th>
+                        <td>
+                            <input name="Teleoperated.Low" type="text" value="{{.Teleoperated.Low}}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Coop Bridge Attempted:</th>
+                        <td>
+                            <input name="CoopBridge.Attempted" type="checkbox" value="1"{{if .CoopBridge.Attempted}} checked="checked"{{end}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Coop Bridge Success:</th>
+                        <td>
+                            <input name="CoopBridge.Success" type="checkbox" value="1"{{if .CoopBridge.Success}} checked="checked"{{end}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Bridge 1 Attempted:</th>
+                        <td>
+                            <input name="TeamBridge1.Attempted" type="checkbox" value="1"{{if .TeamBridge1.Attempted}} checked="checked"{{end}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Bridge 1 Success:</th>
+                        <td>
+                            <input name="TeamBridge1.Success" type="checkbox" value="1"{{if .TeamBridge1.Success}} checked="checked"{{end}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Bridge 2 Attempted:</th>
+                        <td>
+                            <input name="TeamBridge2.Attempted" type="checkbox" value="1"{{if .TeamBridge2.Attempted}} checked="checked"{{end}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Bridge 2 Success:</th>
+                        <td>
+                            <input name="TeamBridge2.Success" type="checkbox" value="1"{{if .TeamBridge2.Success}} checked="checked"{{end}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Scout Name:</th>
+                        <td>
+                            <input name="ScoutName" type="text" value="{{.ScoutName}}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="actions">
+                            <input type="submit" value="Save">
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            {{end}}
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>
+
