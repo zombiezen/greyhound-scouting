@@ -137,7 +137,21 @@ func jump(server *Server, w http.ResponseWriter, req *http.Request) error {
 			return nil
 		}
 
-		// TODO: Match Team
+		if matchTeamTag, err := ParseMatchTeamTag(query); err == nil {
+			// Edit Match Team
+			u, err := server.GetRoute("match.editTeam").URL(
+				"year", strconv.FormatUint(uint64(matchTeamTag.Year), 10),
+				"location", matchTeamTag.LocationCode,
+				"matchType", string(matchTeamTag.MatchType),
+				"matchNumber", strconv.FormatUint(uint64(matchTeamTag.MatchNumber), 10),
+				"teamNumber", strconv.FormatUint(uint64(matchTeamTag.TeamNumber), 10),
+			)
+			if err != nil {
+				return err
+			}
+			http.Redirect(w, req, u.String(), http.StatusFound)
+			return nil
+		}
 	}
 	return server.Templates().ExecuteTemplate(w, "jump.html", map[string]interface{}{
 		"Server":  server,
