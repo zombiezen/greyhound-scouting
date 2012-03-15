@@ -30,7 +30,7 @@
             {{end}}
 
             {{with .Team.Robot}}
-            {{if or .Name .Image .Notes}}
+            {{if or .Name .Notes}}
             <section id="robot_info">
                 <h2 id="robot">Robot Info</h2>
 
@@ -44,7 +44,19 @@
             {{end}}
             {{end}}
 
-            {{/* TODO: Registered Events */}}
+            <h2 id="events">Registered Events</h2>
+            {{range .Stats}}
+            {{with .EventTag}}<h3>{{.Year}}{{.LocationCode}}</h3>{{end}}
+            {{/* TODO: See matches... */}}
+
+            <table class="info">
+                <tr><th>Match Count</th><td>{{.MatchCount}}</td></th>
+                <tr><th>Average Score</th><td>{{.AverageScore}}</td></th>
+                <tr><th>Failure Rate</th><td>{{.FailureRate|percent}}</td></th>
+                <tr><th>Average Autonomous Hoops</th><td>{{.AverageAutonomousHoops}}</td></th>
+                <tr><th>Average Teleoperated Hoops</th><td>{{.AverageTeleoperatedHoops}}</td></th>
+            </table>
+            {{end}}
 
             {{/* TODO: Overall Statistics */}}
 

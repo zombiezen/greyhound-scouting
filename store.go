@@ -19,6 +19,10 @@ type Datastore interface {
 	FetchEvent(EventTag) (*Event, error)
 	FetchMatches(EventTag) ([]*Match, error)
 	FetchMatch(MatchTag) (*Match, error)
+
+	EventsForTeam(year int, number int) ([]EventTag, error)
+
+	TeamEventStats(EventTag, int) (TeamStats, error)
 }
 
 const (
@@ -96,4 +100,57 @@ func (store mongoDatastore) FetchMatch(tag MatchTag) (*Match, error) {
 		return nil, err
 	}
 	return &match, nil
+}
+
+func (store mongoDatastore) EventsForTeam(year int, number int) ([]EventTag, error) {
+	query := store.C(eventCollection).Find(bson.M{"date.year": year, "teams": number}).Sort(bson.D{{"date.month", 1}, {"date.day", 1}})
+	var events []Event
+	if err := query.All(&events); err != nil {
+		return nil, err
+	}
+	tags := make([]EventTag, len(events))
+	for i := range events {
+		tags[i] = events[i].Tag()
+	}
+	return tags, nil
+}
+
+// TeamEventStats returns team statistics for a single event.
+func (store mongoDatastore) TeamEventStats(tag EventTag, number int) (TeamStats, error) {
+	iter := store.C(matchCollection(tag)).Find(bson.M{"teams.team": number}).Limit(matchLimit).Iter()
+
+	var stats TeamStats
+	var match Match
+	stats.EventTag = tag
+	for iter.Next(&match) {
+		var i int
+		for i = 0; i < len(match.Teams); i++ {
+			if match.Teams[i].Team == number {
+				break
+			}
+		}
+		if i >= len(match.Teams) {
+			// Team not found in match.  This shouldn't be hit.
+			// TODO: Log problem
+			continue
+		}
+
+		if match.Teams[i].NoShow {
+			stats.NoShowCount++
+			continue
+		}
+
+		if match.Score == nil {
+			continue
+		}
+
+		stats.MatchCount++
+		stats.TotalPoints += match.Teams[i].Score
+		if match.Teams[i].Failure {
+			stats.Failures++
+		}
+		stats.AutonomousHoops.Add(match.Teams[i].Autonomous)
+		stats.TeleoperatedHoops.Add(match.Teams[i].Teleoperated)
+	}
+	return stats, iter.Err()
 }

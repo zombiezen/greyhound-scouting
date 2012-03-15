@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/gorilla/mux"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func teamIndex(server *Server, w http.ResponseWriter, req *http.Request) error {
@@ -52,12 +53,24 @@ func viewTeam(server *Server, w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	// TODO: stats
+	// Stats
+	eventTags, err := server.Store().EventsForTeam(time.Now().Year(), number)
+	if err != nil {
+		return err
+	}
+	stats := make([]TeamStats, len(eventTags))
+	for i := range eventTags {
+		stats[i], err = server.Store().TeamEventStats(eventTags[i], number)
+		if err != nil {
+			return err
+		}
+	}
 	// TODO: image
 
 	return server.Templates().ExecuteTemplate(w, "team.html", map[string]interface{}{
 		"Server":  server,
 		"Request": req,
 		"Team":    team,
+		"Stats":   stats,
 	})
 }

@@ -180,6 +180,15 @@ type TeamInfo struct {
 	NoShow  bool
 }
 
+type Hoop int
+
+const (
+	NoHoop Hoop = iota
+	HighHoop
+	MidHoop
+	LowHoop
+)
+
 // HoopCount stores how many hoops were scored per robot per phase.
 type HoopCount struct {
 	High int
@@ -190,6 +199,31 @@ type HoopCount struct {
 // score returns the score for a hoop count for the high, mid, and low score multipliers.
 func (h HoopCount) score(high, mid, low int) int {
 	return h.High*high + h.Mid*mid + h.Low*low
+}
+
+// Total returns the total number of hoops scored.
+func (h HoopCount) Total() int {
+	return h.High + h.Mid + h.Low
+}
+
+// Max returns the hoop with the maximum count.  If all hoops are zero, then NoHoop is returned.
+func (h HoopCount) Max() Hoop {
+	switch {
+	case h.High == 0 && h.Mid == 0 && h.Low == 0:
+		return NoHoop
+	case h.Low > h.Mid && h.Low > h.High:
+		return LowHoop
+	case h.Mid > h.Low && h.Mid > h.High:
+		return MidHoop
+	}
+	return HighHoop
+}
+
+// Add increments h1 by h2.
+func (h1 *HoopCount) Add(h2 HoopCount) {
+	h1.High += h2.High
+	h1.Mid += h2.Mid
+	h1.Low += h2.Low
 }
 
 // Bridge stores a match bridge attempt.
@@ -241,4 +275,49 @@ type AllianceInfo struct {
 	Teams    []TeamInfo
 	Score    int
 	Won      bool
+}
+
+// TeamStats holds team statistics.
+type TeamStats struct {
+	EventTag    EventTag
+	MatchCount  int
+	TotalPoints int
+
+	NoShowCount int
+	Failures    int
+
+	AutonomousHoops   HoopCount
+	TeleoperatedHoops HoopCount
+}
+
+// AverageScore returns the average score.  Returns 0.0 if match count is zero.
+func (stats TeamStats) AverageScore() float64 {
+	if stats.MatchCount == 0 {
+		return 0.0
+	}
+	return float64(stats.TotalPoints) / float64(stats.MatchCount)
+}
+
+// FailureRate returns the number of failures divided by the number of matches played.  Returns 0.0 if match count is zero.
+func (stats TeamStats) FailureRate() float64 {
+	if stats.MatchCount == 0 {
+		return 0.0
+	}
+	return float64(stats.Failures) / float64(stats.MatchCount)
+}
+
+// AverageTeleoperatedHoops returns the average number of hoops scored per match.  Returns 0.0 if match count is zero.
+func (stats TeamStats) AverageTeleoperatedHoops() float64 {
+	if stats.MatchCount == 0 {
+		return 0.0
+	}
+	return float64(stats.TeleoperatedHoops.Total()) / float64(stats.MatchCount)
+}
+
+// AverageAutonomousHoops returns the average number of hoops scored per match.  Returns 0.0 if match count is zero.
+func (stats TeamStats) AverageAutonomousHoops() float64 {
+	if stats.MatchCount == 0 {
+		return 0.0
+	}
+	return float64(stats.AutonomousHoops.Total()) / float64(stats.MatchCount)
 }
