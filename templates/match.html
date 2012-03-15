@@ -24,6 +24,62 @@
                 <h2>{{with .Event}}<a href="{{route "event.view" "year" .Date.Year "location" .Location.Code}}">{{.Location.Name}} ({{.Date.Year}})</a>{{end}}</h2>
             </hgroup>
 
+            <table id="match_teams">
+                <thead>
+                    <th class="red_alliance" scope="col" colspan="2">Red{{with .Match.Score}}: {{.red}}{{end}}</th>
+                    <th class="blue_alliance" scope="col" colspan="2">Blue{{with .Match.Score}}: {{.blue}}{{end}}</th>
+                </thead>
+                <tbody>
+                    {{range .Match.AlliancePairs}}
+                    <tr class="team_header">
+                        {{template "match-headerCell.html" .Red}}
+                        {{template "match-headerCell.html" .Blue}}
+                    </tr>
+
+                    <tr>
+                        {{template "match-cellPair.html" map "Label" "Autonomous High" "Red" .Red.Autonomous.High "Blue" .Blue.Autonomous.High}}
+                    </tr>
+                    <tr>
+                        {{template "match-cellPair.html" map "Label" "Autonomous Mid" "Red" .Red.Autonomous.Mid "Blue" .Blue.Autonomous.Mid}}
+                    </tr>
+                    <tr>
+                        {{template "match-cellPair.html" map "Label" "Autonomous Low" "Red" .Red.Autonomous.Low "Blue" .Blue.Autonomous.Low}}
+                    </tr>
+
+                    <tr>
+                        {{template "match-cellPair.html" map "Label" "Teleoperated High" "Red" .Red.Teleoperated.High "Blue" .Blue.Teleoperated.High}}
+                    </tr>
+                    <tr>
+                        {{template "match-cellPair.html" map "Label" "Teleoperated Mid" "Red" .Red.Teleoperated.Mid "Blue" .Blue.Teleoperated.Mid}}
+                    </tr>
+                    <tr>
+                        {{template "match-cellPair.html" map "Label" "Teleoperated Low" "Red" .Red.Teleoperated.Low "Blue" .Blue.Teleoperated.Low}}
+                    </tr>
+
+                    <tr>
+                        {{template "match-boolCellPair.html" map "Label" "Coop Bridge Attempted" "Red" .Red.CoopBridge.Attempted "Blue" .Blue.CoopBridge.Attempted}}
+                    </tr>
+                    <tr>
+                        {{template "match-boolCellPair.html" map "Label" "Coop Bridge Success" "Red" .Red.CoopBridge.Success "Blue" .Blue.CoopBridge.Success}}
+                    </tr>
+
+                    <tr>
+                        {{template "match-boolCellPair.html" map "Label" "Bridge 1 Attempted" "Red" .Red.TeamBridge1.Attempted "Blue" .Blue.TeamBridge1.Attempted}}
+                    </tr>
+                    <tr>
+                        {{template "match-boolCellPair.html" map "Label" "Bridge 1 Success" "Red" .Red.TeamBridge1.Success "Blue" .Blue.TeamBridge1.Success}}
+                    </tr>
+
+                    <tr>
+                        {{template "match-boolCellPair.html" map "Label" "Bridge 2 Attempted" "Red" .Red.TeamBridge2.Attempted "Blue" .Blue.TeamBridge2.Attempted}}
+                    </tr>
+                    <tr>
+                        {{template "match-boolCellPair.html" map "Label" "Bridge 2 Success" "Red" .Red.TeamBridge2.Success "Blue" .Blue.TeamBridge2.Success}}
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+
             {{/* TODO: Video */}}
 
             <h2>Reports</h2>
@@ -38,3 +94,41 @@
 </body>
 {{template "watermark.html"}}
 </html>
+
+{{define "match-headerCell.html"}}
+    <th class="{{.Alliance}}_alliance team_num">
+        {{with .Team}}
+            <a href="{{route "team.view" "number" .}}">{{.}}</a>
+        {{else}}
+            &nbsp;
+        {{end}}
+    </th>
+    <th class="{{.Alliance}}_alliance score">
+        {{with .Score}}{{.}}{{else}}&nbsp;{{end}}
+    </th>
+{{end}}
+
+{{define "match-labelPair.html"}}
+    <td class="red_alliance" colspan="2">{{.}}</td>
+    <td class="blue_alliance" colspan="2">{{.}}</td>
+{{end}}
+
+{{define "match-cellPair.html"}}
+    {{template "match-cell.html" map "Label" .Label "Alliance" "red" "Value" .Red}}
+    {{template "match-cell.html" map "Label" .Label "Alliance" "blue" "Value" .Blue}}
+{{end}}
+
+{{define "match-cell.html"}}
+    <td class="{{.Alliance}}_alliance">{{.Label}}</td>
+    <td class="{{.Alliance}}_alliance">{{.Value}}</td>
+{{end}}
+
+{{define "match-boolCellPair.html"}}
+    {{template "match-boolCell.html" map "Label" .Label "Alliance" "red" "Value" .Red}}
+    {{template "match-boolCell.html" map "Label" .Label "Alliance" "blue" "Value" .Blue}}
+{{end}}
+
+{{define "match-boolCell.html"}}
+    <td class="{{.Alliance}}_alliance">{{.Label}}</td>
+    <td class="{{.Alliance}}_alliance">{{if .Value}}Yes{{else}}No{{end}}</td>
+{{end}}
