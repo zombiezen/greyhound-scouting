@@ -63,6 +63,7 @@ header {
 @media print {
   header > nav {
     display: none; } }
+
 #main {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -128,6 +129,7 @@ header {
     left: 50%;
     float: right;
     margin-left: 2em; } }
+
 .listing .odd .red_alliance {
   background: #ee707f; }
 .listing .odd .blue_alliance {
@@ -141,11 +143,12 @@ header {
   border: thin solid #333;
   font-size: 125%; }
   #match_teams td, #match_teams th {
-    padding: 0.5ex 1ex; }
+    padding: 0.5ex 1ex;
+    font-size: 95%; }
   #match_teams > thead > th {
     width: 50%; }
   #match_teams td {
-    width: 25%; }
+    width: 12.5%; }
   #match_teams .team_header {
     border-top: thin solid #333;
     border-bottom: thin solid #333;

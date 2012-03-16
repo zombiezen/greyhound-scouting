@@ -9,6 +9,8 @@ GOFILES=\
 	store.go\
 	tags.go\
 	team.go\
+	barcode/barcode.go\
+	barcode/code128.go\
 
 CSSFILES=\
     static/css/all.css\
@@ -27,7 +29,7 @@ clean:
 	rm -f $(CLEANFILES)
 
 $(TARG): $(GOFILES)
-	go build -o $(TARG) $(GOFILES)
+	go build -o $(TARG)
 
 css: $(CSSFILES)
 

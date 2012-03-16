@@ -2,6 +2,7 @@ package main
 
 import (
 	"bitbucket.org/zombiezen/gopdf/pdf"
+	"bitbucket.org/zombiezen/greyhound-scouting/barcode"
 	"fmt"
 )
 
@@ -87,6 +88,20 @@ func renderScoutForm(canvas *pdf.Canvas, w, h pdf.Unit, event *Event, match *Mat
 	text.Text(fmt.Sprintf("Team %d", teamNum))
 	canvas.DrawText(text)
 	canvas.Pop()
+
+	// Barcode
+	bc := &barcode.Image{
+		Barcode: barcode.Encode(MatchTeamTag{MatchTag{event.Tag(), match.Type, uint(match.Number)}, uint(teamNum)}.String()),
+		Scale:   1,
+		Height:  24,
+	}
+	var bcRect pdf.Rectangle
+	bcRect.Min.X = w - reportMargin - pdf.Unit(bc.Bounds().Dx())
+	bcRect.Min.Y = h - reportMargin - pdf.Unit(bc.Bounds().Dy())
+	bcRect.Max.X = bcRect.Min.X + pdf.Unit(bc.Bounds().Dx())
+	bcRect.Max.Y = bcRect.Min.Y + pdf.Unit(bc.Bounds().Dy())
+	canvas.DrawImage(bc, bcRect)
+	// TODO: Text
 
 	// Scores
 	headingBaseline := baseline + text.Y() - 0.25*pdf.Inch - scoreFontSize
