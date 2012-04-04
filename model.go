@@ -110,14 +110,14 @@ type Match struct {
 }
 
 // AlliancePairs returns pairs of team infos.
-func (match *Match) AlliancePairs() []struct{Red, Blue *TeamInfo} {
+func (match *Match) AlliancePairs() []struct{ Red, Blue *TeamInfo } {
 	red := match.AllianceInfo(Red)
 	blue := match.AllianceInfo(Blue)
 	maxLen := len(red.Teams)
 	if len(blue.Teams) > maxLen {
 		maxLen = len(blue.Teams)
 	}
-	pairs := make([]struct{Red, Blue *TeamInfo}, maxLen)
+	pairs := make([]struct{ Red, Blue *TeamInfo }, maxLen)
 	for i := range pairs {
 		if i < len(red.Teams) {
 			pairs[i].Red = &red.Teams[i]

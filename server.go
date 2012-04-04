@@ -28,17 +28,17 @@ func NewServer(store Datastore) *Server {
 	server.templates.Funcs(template.FuncMap{
 		"route": server.routeFunc(),
 		"percent": func(x float64) string {
-			return fmt.Sprintf("%.1f%%", x * 100)
+			return fmt.Sprintf("%.1f%%", x*100)
 		},
 		"cycle": func(i int, vals ...interface{}) interface{} {
 			return vals[i%len(vals)]
 		},
 		"map": func(vals ...interface{}) (map[string]interface{}, error) {
-			if len(vals) % 2 != 0 {
+			if len(vals)%2 != 0 {
 				return nil, fmt.Errorf("map must be given an even number of arguments, %d given", len(vals))
 			}
 
-			m := make(map[string]interface{}, len(vals) / 2)
+			m := make(map[string]interface{}, len(vals)/2)
 			for i := 0; i < len(vals); i += 2 {
 				if k, ok := vals[i].(string); ok {
 					m[k] = vals[i+1]
