@@ -186,8 +186,12 @@ func renderFields(canvas *pdf.Canvas, pt pdf.Point, fontName string, fontSize pd
 	return pdf.Point{pt.X + rightSide + fieldLinePadding + lineLength, baseline}
 }
 
+type teamEventStatser interface {
+	TeamEventStats(EventTag, int) (TeamStats, error)
+}
+
 // renderMatchSheet creates a PDF document for a single match sheet.
-func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *Event, match *Match) {
+func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *Event, match *Match, statser teamEventStatser) error {
 	const (
 		entryHeight  = 3 * pdf.Inch
 		numEntryRows = 3
@@ -242,6 +246,10 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 		if i >= numEntryRows {
 			break
 		}
+		stats, err := statser.TeamEventStats(event.Tag(), teamInfo.Team)
+		if err != nil {
+			return err
+		}
 		renderMatchSheetTeam(
 			canvas,
 			pdf.Rectangle{
@@ -249,12 +257,16 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 				pdf.Point{pageWidth / 2, top - (pdf.Unit(i) * entryHeight)},
 			},
 			teamInfo,
-			TeamStats{}, // TODO
+			stats,
 		)
 	}
 	for i, teamInfo := range blue.Teams {
 		if i >= numEntryRows {
 			break
+		}
+		stats, err := statser.TeamEventStats(event.Tag(), teamInfo.Team)
+		if err != nil {
+			return err
 		}
 		renderMatchSheetTeam(
 			canvas,
@@ -263,9 +275,11 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 				pdf.Point{pageWidth - reportMargin, top - (pdf.Unit(i) * entryHeight)},
 			},
 			teamInfo,
-			TeamStats{}, // TODO
+			stats,
 		)
 	}
+
+	return nil
 }
 
 // renderMatchSheetTeam renders a single team onto a match sheet.
