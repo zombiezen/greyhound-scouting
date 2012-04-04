@@ -185,3 +185,185 @@ func renderFields(canvas *pdf.Canvas, pt pdf.Point, fontName string, fontSize pd
 
 	return pdf.Point{pt.X + rightSide + fieldLinePadding + lineLength, baseline}
 }
+
+// renderMatchSheet creates a PDF document for a single match sheet.
+func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *Event, match *Match) {
+	const (
+		entryHeight  = 3 * pdf.Inch
+		numEntryRows = 3
+	)
+
+	canvas := doc.NewPage(pageWidth, pageHeight)
+	defer canvas.Close()
+
+	red := match.AllianceInfo(Red)
+	blue := match.AllianceInfo(Blue)
+
+	// Heading
+	headingStyle := textStyle{matchNumberFontName, matchNumberFontSize, 0, 0, 0}
+	top := pageHeight - reportMargin - matchNumberFontSize
+	headingStyle.Drawf(canvas, pdf.Point{reportMargin, top}, "%s #%d - %s", match.Type.DisplayName(), match.Number, event.Location.Name)
+	top -= 0.25 * pdf.Inch
+
+	// Barcode
+	bc := &barcode.Image{
+		Barcode: barcode.Encode(MatchTag{event.Tag(), match.Type, uint(match.Number)}.String()),
+		Scale:   1,
+		Height:  24,
+	}
+	var bcRect pdf.Rectangle
+	bcRect.Min.X = pageWidth - reportMargin - pdf.Unit(bc.Bounds().Dx())
+	bcRect.Min.Y = pageHeight - reportMargin - pdf.Unit(bc.Bounds().Dy())
+	bcRect.Max.X = bcRect.Min.X + pdf.Unit(bc.Bounds().Dx())
+	bcRect.Max.Y = bcRect.Min.Y + pdf.Unit(bc.Bounds().Dy())
+	canvas.DrawImage(bc, bcRect)
+	top = bcRect.Min.Y - 0.25*pdf.Inch
+
+	// Cell borders
+	cellStyle := strokeStyle{1, 0, 0, 0}
+	base := top - entryHeight*numEntryRows
+	cellStyle.Rect(canvas, pdf.Rectangle{
+		pdf.Point{reportMargin, base},
+		pdf.Point{pageWidth - reportMargin, top},
+	})
+	cellStyle.Line(canvas,
+		pdf.Point{pageWidth / 2, base},
+		pdf.Point{pageWidth / 2, top},
+	)
+	for i := 1; i < numEntryRows; i++ {
+		cellStyle.Line(canvas,
+			pdf.Point{reportMargin, top - (pdf.Unit(i) * entryHeight)},
+			pdf.Point{pageWidth - reportMargin, top - (pdf.Unit(i) * entryHeight)},
+		)
+	}
+
+	// Teams
+	for i, teamInfo := range red.Teams {
+		if i >= numEntryRows {
+			break
+		}
+		renderMatchSheetTeam(
+			canvas,
+			pdf.Rectangle{
+				pdf.Point{reportMargin, top - (pdf.Unit(i+1) * entryHeight)},
+				pdf.Point{pageWidth / 2, top - (pdf.Unit(i) * entryHeight)},
+			},
+			teamInfo,
+			TeamStats{}, // TODO
+		)
+	}
+	for i, teamInfo := range blue.Teams {
+		if i >= numEntryRows {
+			break
+		}
+		renderMatchSheetTeam(
+			canvas,
+			pdf.Rectangle{
+				pdf.Point{pageWidth / 2, top - (pdf.Unit(i+1) * entryHeight)},
+				pdf.Point{pageWidth - reportMargin, top - (pdf.Unit(i) * entryHeight)},
+			},
+			teamInfo,
+			TeamStats{}, // TODO
+		)
+	}
+}
+
+// renderMatchSheetTeam renders a single team onto a match sheet.
+func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo, stats TeamStats) {
+	const (
+		padding     = 0.125 * pdf.Inch
+		statPadding = 0.0625 * pdf.Inch
+	)
+
+	rect.Min.X += padding
+	rect.Min.Y += padding
+	rect.Max.X -= padding
+	rect.Max.Y -= padding
+
+	// Team number
+	teamNumberStyle := textStyle{FontName: pdf.HelveticaBold, FontSize: 16}
+	if info.Alliance == Red {
+		teamNumberStyle.R = 0.69
+		teamNumberStyle.G = 0.08
+		teamNumberStyle.B = 0.15
+	} else {
+		teamNumberStyle.R = 0.31
+		teamNumberStyle.G = 0.34
+		teamNumberStyle.B = 0.72
+	}
+	baseline := rect.Max.Y - teamNumberStyle.FontSize
+	teamNumberStyle.Drawf(canvas, pdf.Point{rect.Min.X, baseline}, "%d", info.Team)
+
+	// TODO: image
+
+	// Stats
+	statStyle := textStyle{pdf.Helvetica, 12, 0, 0, 0}
+	var textObj pdf.Text
+	textObj.SetFont(statStyle.FontName, statStyle.FontSize)
+	textObj.Text(fmt.Sprintf("Matches Played: %d", stats.MatchCount))
+	textObj.NextLine()
+	if stats.MatchCount != 0 {
+		textObj.Text(fmt.Sprintf("Average Score: %.1f", stats.AverageScore()))
+		textObj.NextLine()
+		textObj.Text(fmt.Sprintf("Average Teleop Hoops: %.1f", stats.AverageTeleoperatedHoops()))
+		textObj.NextLine()
+		textObj.Text(fmt.Sprintf("Average Auto Hoops: %.1f", stats.AverageAutonomousHoops()))
+		textObj.NextLine()
+	}
+
+	baseline -= statStyle.FontSize + statPadding
+	canvas.SetColor(statStyle.R, statStyle.G, statStyle.B)
+	canvas.Push()
+	canvas.Translate(rect.Min.X, baseline)
+	canvas.DrawText(&textObj)
+	canvas.Pop()
+}
+
+type textStyle struct {
+	FontName string
+	FontSize pdf.Unit
+	R, G, B  float32
+}
+
+// Draw renders simple text at pt.
+func (style textStyle) Draw(canvas *pdf.Canvas, pt pdf.Point, s string) {
+	canvas.Push()
+	canvas.Translate(pt.X, pt.Y)
+	var text pdf.Text
+	canvas.SetColor(style.R, style.G, style.B)
+	text.SetFont(style.FontName, style.FontSize)
+	text.Text(s)
+	canvas.DrawText(&text)
+	canvas.Pop()
+}
+
+// Drawf renders simple text at pt using Sprintf.
+func (style textStyle) Drawf(canvas *pdf.Canvas, pt pdf.Point, format string, args ...interface{}) {
+	style.Draw(canvas, pt, fmt.Sprintf(format, args...))
+}
+
+type strokeStyle struct {
+	LineWidth pdf.Unit
+	R, G, B   float32
+}
+
+// Rect draws a rectangle.
+func (style strokeStyle) Rect(canvas *pdf.Canvas, rect pdf.Rectangle) {
+	var path pdf.Path
+	path.Rectangle(rect)
+
+	canvas.SetLineWidth(style.LineWidth)
+	canvas.SetStrokeColor(style.R, style.G, style.B)
+	canvas.Stroke(&path)
+}
+
+// Line draws a line.
+func (style strokeStyle) Line(canvas *pdf.Canvas, pt1, pt2 pdf.Point) {
+	var path pdf.Path
+	path.Move(pt1)
+	path.Line(pt2)
+
+	canvas.SetLineWidth(style.LineWidth)
+	canvas.SetStrokeColor(style.R, style.G, style.B)
+	canvas.Stroke(&path)
+}

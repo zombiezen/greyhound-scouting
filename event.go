@@ -225,6 +225,33 @@ func eventScoutForms(server *Server, w http.ResponseWriter, req *http.Request) e
 	return doc.Encode(w)
 }
 
+func matchSheet(server *Server, w http.ResponseWriter, req *http.Request) error {
+	vars := mux.Vars(req)
+
+	// Fetch event
+	event, err := server.Store().FetchEvent(routeEventTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Fetch match
+	match, err := server.Store().FetchMatch(routeMatchTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	doc := pdf.New()
+	renderMatchSheet(doc, pdf.USLetterWidth, pdf.USLetterHeight, event, match)
+	return doc.Encode(w)
+}
+
 func eventSpreadsheet(server *Server, w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 

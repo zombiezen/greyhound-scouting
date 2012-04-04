@@ -62,8 +62,7 @@
             {{/* TODO: Video */}}
 
             <h2>Reports</h2>
-            <p><a href="#">Scouting Forms</a></p>
-            <p><a href="#">Match Sheet</a></p>
+            <p><a href="{{route "match.sheet" "year" .Event.Date.Year "location" .Event.Location.Code "matchType" .Match.Type "matchNumber" .Match.Number}}">Match Sheet</a></p>
             <!-- end content -->
         </div>
     </div>
