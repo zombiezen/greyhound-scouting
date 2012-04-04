@@ -8,7 +8,7 @@
 <tbody>
     {{range $i, $team := .}}
     <tr class="{{cycle $i "odd" "even"}}">
-        {{with $teamURL = route "team.view" "number" .Number}}
+        {{with $teamURL := route "team.view" "number" .Number}}
         <td class="team_number">{{with $team.Number}}<a href="{{$teamURL}}">{{.}}</a>{{end}}</td>
         <td class="team_name">{{with $team.Name}}<a href="{{$teamURL}}">{{.}}</a>{{end}}</td>
         {{with $team.Robot}}
