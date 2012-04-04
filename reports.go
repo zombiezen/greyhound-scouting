@@ -96,8 +96,8 @@ func renderScoutForm(canvas *pdf.Canvas, w, h pdf.Unit, event *Event, match *Mat
 		Height:  24,
 	}
 	var bcRect pdf.Rectangle
-	bcRect.Min.X = w - reportMargin - pdf.Unit(bc.Bounds().Dx())
-	bcRect.Min.Y = h - reportMargin - pdf.Unit(bc.Bounds().Dy())
+	bcRect.Min.X = w - pdf.Unit(bc.Bounds().Dx())
+	bcRect.Min.Y = h - pdf.Unit(bc.Bounds().Dy())
 	bcRect.Max.X = bcRect.Min.X + pdf.Unit(bc.Bounds().Dx())
 	bcRect.Max.Y = bcRect.Min.Y + pdf.Unit(bc.Bounds().Dy())
 	canvas.DrawImage(bc, bcRect)
