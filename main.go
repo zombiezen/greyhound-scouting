@@ -2,11 +2,14 @@ package main
 
 import (
 	"code.google.com/p/gorilla/mux"
+	"encoding/csv"
 	"flag"
+	"io"
 	"launchpad.net/mgo"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 )
 
@@ -26,12 +29,22 @@ var (
 
 func main() {
 	parseFlags()
-	createServer()
-	parseTemplates()
-	addRoutes()
 
-	log.Printf("Listening on %s", address)
-	http.ListenAndServe(address, Logger{server})
+	if flag.NArg() == 0 {
+		createServer()
+		parseTemplates()
+		addRoutes()
+
+		log.Printf("Listening on %s", address)
+		http.ListenAndServe(address, Logger{server})
+	} else {
+		switch flag.Arg(0) {
+		case "teams":
+			importTeams()
+		default:
+			log.Fatal("usage: scouting [teams]")
+		}
+	}
 }
 
 func parseFlags() {
@@ -44,13 +57,21 @@ func parseFlags() {
 	flag.Parse()
 }
 
-func createServer() {
+func openDatastore() (Datastore, error) {
 	session, err := mgo.Dial(mongoURL)
+	if err != nil {
+		return nil, err
+	}
+	return mongoDatastore{session.DB(database)}, nil
+}
+
+func createServer() {
+	datastore, err := openDatastore()
 	if err != nil {
 		log.Fatalf("Could not connect to database: %v", err)
 	}
 
-	server = NewServer(mongoDatastore{session.DB(database)})
+	server = NewServer(datastore)
 	server.imagestore = directoryImagestore{imagedir, &url.URL{Path: "/team/images/"}}
 	server.Debug = debug
 }
@@ -169,4 +190,40 @@ func jump(server *Server, w http.ResponseWriter, req *http.Request) error {
 		"Request": req,
 		"Query":   query,
 	})
+}
+
+// importTeams handles the teams command.
+func importTeams() {
+	if flag.NArg() != 1 {
+		log.Fatal("usage: scouting teams")
+	}
+
+	datastore, err := openDatastore()
+	if err != nil {
+		log.Fatalln("Could not connect to database:", err)
+	}
+
+	r := csv.NewReader(os.Stdin)
+	for {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+		}
+
+		if len(row) != 2 {
+			log.Fatal("Team CSV files must be number,name")
+		}
+
+		num, err := strconv.Atoi(row[0])
+		if err != nil {
+			log.Printf("Row found with bad number: %q (%v)", row[0], err)
+			continue
+		}
+
+		if err := datastore.UpsertTeam(Team{Number: num, Name: row[1]}); err != nil {
+			log.Printf("Error updating team: %v", err)
+		}
+	}
 }

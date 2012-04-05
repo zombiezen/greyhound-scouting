@@ -24,6 +24,7 @@ type Datastore interface {
 
 	TeamEventStats(EventTag, int) (TeamStats, error)
 
+	UpsertTeam(Team) error
 	UpdateMatchTeam(MatchTag, int, TeamInfo) error
 }
 
@@ -155,6 +156,11 @@ func (store mongoDatastore) TeamEventStats(tag EventTag, number int) (TeamStats,
 		stats.TeleoperatedHoops.Add(match.Teams[i].Teleoperated)
 	}
 	return stats, iter.Err()
+}
+
+func (store mongoDatastore) UpsertTeam(team Team) error {
+	_, err := store.C(teamCollection).Upsert(bson.M{"_id": team.Number}, team)
+	return err
 }
 
 func (store mongoDatastore) UpdateMatchTeam(tag MatchTag, teamNumber int, info TeamInfo) error {
