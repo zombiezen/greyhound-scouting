@@ -333,6 +333,12 @@ func eventSpreadsheet(server *Server, w http.ResponseWriter, req *http.Request) 
 		"Average Score",
 		"Average Teleop Hoops",
 		"Average Auto Hoops",
+		"Coop Bridge Attempt Rate",
+		"Coop Bridge Success Rate",
+		"Bridge 1 Attempt Rate",
+		"Bridge 1 Success Rate",
+		"Bridge 2 Attempt Rate",
+		"Bridge 2 Success Rate",
 	})
 
 	for _, teamNum := range event.Teams {
@@ -349,6 +355,12 @@ func eventSpreadsheet(server *Server, w http.ResponseWriter, req *http.Request) 
 			strconv.FormatFloat(stats.AverageScore(), 'f', -1, 64),
 			strconv.FormatFloat(stats.AverageTeleoperatedHoops(), 'f', -1, 64),
 			strconv.FormatFloat(stats.AverageAutonomousHoops(), 'f', -1, 64),
+			strconv.FormatFloat(stats.CoopBridge.AttemptRate(stats.MatchCount), 'f', -1, 64),
+			strconv.FormatFloat(stats.CoopBridge.SuccessRate(), 'f', -1, 64),
+			strconv.FormatFloat(stats.TeamBridge1.AttemptRate(stats.MatchCount), 'f', -1, 64),
+			strconv.FormatFloat(stats.TeamBridge1.SuccessRate(), 'f', -1, 64),
+			strconv.FormatFloat(stats.TeamBridge2.AttemptRate(stats.MatchCount), 'f', -1, 64),
+			strconv.FormatFloat(stats.TeamBridge2.SuccessRate(), 'f', -1, 64),
 		})
 	}
 
