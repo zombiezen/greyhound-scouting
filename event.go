@@ -5,6 +5,7 @@ import (
 	"code.google.com/p/gorilla/mux"
 	"code.google.com/p/gorilla/schema"
 	"encoding/csv"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -272,14 +273,27 @@ func eventSpreadsheet(server *Server, w http.ResponseWriter, req *http.Request) 
 		"Team #",
 		"Matches Played",
 		"No-Shows",
+		"Failures",
+		"Failure Rate",
+		"Average Score",
+		"Average Teleop Hoops",
+		"Average Auto Hoops",
 	})
 
 	for _, teamNum := range event.Teams {
-		// TODO: Get team stats
+		stats, err := server.Store().TeamEventStats(event.Tag(), teamNum)
+		if err != nil {
+			log.Printf("Stats failed for team %d: %v", teamNum, err)
+		}
 		cw.Write([]string{
 			strconv.Itoa(teamNum),
-			strconv.Itoa(0),
-			strconv.Itoa(0),
+			strconv.Itoa(stats.MatchCount),
+			strconv.Itoa(stats.NoShowCount),
+			strconv.Itoa(stats.Failures),
+			strconv.FormatFloat(stats.FailureRate(), 'f', -1, 64),
+			strconv.FormatFloat(stats.AverageScore(), 'f', -1, 64),
+			strconv.FormatFloat(stats.AverageTeleoperatedHoops(), 'f', -1, 64),
+			strconv.FormatFloat(stats.AverageAutonomousHoops(), 'f', -1, 64),
 		})
 	}
 

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -349,6 +350,7 @@ func importSchedule() {
 	for teamNum, _ := range teamSet {
 		event.Teams = append(event.Teams, teamNum)
 	}
+	sort.Ints(event.Teams)
 	if err := datastore.UpsertEvent(event); err != nil {
 		log.Fatal("Upserting event: %v", err)
 	}
