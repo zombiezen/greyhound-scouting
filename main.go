@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const templatePrefix = "templates/"
@@ -41,6 +43,8 @@ func main() {
 		switch flag.Arg(0) {
 		case "teams":
 			importTeams()
+		case "schedule":
+			importSchedule()
 		default:
 			log.Fatal("usage: scouting [teams]")
 		}
@@ -222,8 +226,130 @@ func importTeams() {
 			continue
 		}
 
-		if err := datastore.UpsertTeam(Team{Number: num, Name: row[1]}); err != nil {
+		if err := datastore.UpsertTeam(&Team{Number: num, Name: row[1]}); err != nil {
 			log.Printf("Error updating team: %v", err)
 		}
+	}
+}
+
+// importSchedule handles the schedule command.
+func importSchedule() {
+	var event *Event
+	var etag EventTag
+	var err error
+
+	switch flag.NArg() {
+	case 2:
+		if etag, err = ParseEventTag(flag.Arg(1)); err != nil {
+			log.Fatalf("Invalid code %q: %v", flag.Arg(1), err)
+		}
+	case 4:
+		// Parse/validate date
+		dateParts := strings.SplitN(flag.Arg(1), "-", 3)
+		if len(dateParts) != 3 {
+			log.Fatal("DATE must be YYYY-MM-DD, got %q", flag.Arg(1))
+		}
+		year, err := strconv.ParseUint(dateParts[0], 10, 0)
+		if err != nil {
+			log.Fatalf("Bad year: %v", err)
+		}
+		month, err := strconv.ParseUint(dateParts[1], 10, 0)
+		if err != nil {
+			log.Fatalf("Bad month: %v", err)
+		}
+		day, err := strconv.ParseUint(dateParts[2], 10, 0)
+		if err != nil {
+			log.Fatalf("Bad day: %v", err)
+		}
+		d := time.Date(int(year), time.Month(month), int(day), 0, 0, 0, 0, time.UTC)
+		year, month, day = uint64(d.Year()), uint64(d.Month()), uint64(d.Day())
+
+		// Validate location code
+		if flag.Arg(2) == "" {
+			log.Fatal("Location code must be non-empty")
+		}
+
+		// Upsert event
+		etag = EventTag{flag.Arg(2), uint(year)}
+		event = new(Event)
+		event.Location.Code = flag.Arg(2)
+		event.Location.Name = flag.Arg(3)
+		event.Date.Year = int(year)
+		event.Date.Month = int(month)
+		event.Date.Day = int(day)
+	default:
+		log.Fatal("usage: scouting schedule ( CODE | DATE LOC_CODE LOC_NAME )")
+	}
+
+	// Open datastore
+	datastore, err := openDatastore()
+	if err != nil {
+		log.Fatalln("Could not connect to database:", err)
+	}
+
+	// Create event
+	teamSet := make(map[int]bool)
+	if flag.NArg() == 2 {
+		event, err = datastore.FetchEvent(etag)
+		if err != nil {
+			log.Fatalf("Fetching event %q: %v", flag.Arg(1), err)
+		}
+		for _, num := range event.Teams {
+			teamSet[num] = true
+		}
+	}
+
+	// Read matches
+	r := csv.NewReader(os.Stdin)
+	for {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Printf("CSV file error: %v (stopping match import, creating event)")
+			break
+		}
+
+		if len(row) != 9 {
+			log.Fatal("Bad CSV file: must be time,type,num,red1,red2,red3,blue1,blue2,blue3")
+		}
+
+		nums := make([]uint, 7)
+		matchType := MatchType(row[1])
+		if matchType != Qualification && matchType != QuarterFinal && matchType != SemiFinal && matchType != Final {
+			log.Printf("Bad match type %q: must be %q/%q/%q/%q", matchType, Qualification, QuarterFinal, SemiFinal, Final)
+			continue
+		}
+		for i, col := range row[2:] {
+			n, err := strconv.ParseUint(col, 10, 0)
+			if err != nil {
+				log.Printf("Bad cell %q: %v", col, err)
+			}
+			nums[i] = uint(n)
+		}
+		m := Match{Type: matchType, Number: int(nums[0])}
+		m.Teams = append(m.Teams, TeamInfo{Team: int(nums[1]), Alliance: Red})
+		m.Teams = append(m.Teams, TeamInfo{Team: int(nums[2]), Alliance: Red})
+		m.Teams = append(m.Teams, TeamInfo{Team: int(nums[3]), Alliance: Red})
+		m.Teams = append(m.Teams, TeamInfo{Team: int(nums[4]), Alliance: Blue})
+		m.Teams = append(m.Teams, TeamInfo{Team: int(nums[5]), Alliance: Blue})
+		m.Teams = append(m.Teams, TeamInfo{Team: int(nums[6]), Alliance: Blue})
+		if err = datastore.UpsertMatch(etag, &m); err != nil {
+			log.Printf("Error for match %s %d: %v", m.Type, m.Number, err)
+			continue
+		}
+
+		for _, n := range nums[1:] {
+			teamSet[int(n)] = true
+		}
+	}
+
+	// Update event
+	event.Teams = make([]int, 0, len(teamSet))
+	for teamNum, _ := range teamSet {
+		event.Teams = append(event.Teams, teamNum)
+	}
+	if err := datastore.UpsertEvent(event); err != nil {
+		log.Fatal("Upserting event: %v", err)
 	}
 }
