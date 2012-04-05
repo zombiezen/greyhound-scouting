@@ -63,7 +63,7 @@
                         {{with $teamURL := route "team.view" "number" .Number}}{{with $team}}
                         <td class="team_number"><a href="{{$teamURL}}">{{.Number}}</a></td>
                         <td class="team_name">{{with .Name}}<a href="{{$teamURL}}">{{.}}</a>{{end}}</td>
-                        <td class="robot_name">{{with .Robot.Name}}<a href="{{$teamURL}}#robot">{{.}}</a>{{end}}</td>
+                        <td class="robot_name">{{with .Robot}}{{with .Name}}<a href="{{$teamURL}}#robot">{{.}}</a>{{end}}{{end}}</td>
                         {{/* TODO: Matches link */}}
                         <td class="team_matches"><a href="#">Matches</a></td>
                         {{end}}{{end}}
