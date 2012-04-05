@@ -52,11 +52,19 @@
             {{/* TODO: See matches... */}}
 
             <table class="info">
-                <tr><th>Match Count</th><td>{{.MatchCount}}</td></th>
-                <tr><th>Average Score</th><td>{{.AverageScore}}</td></th>
+                <tr><th>Matches Played</th><td>{{.MatchCount}}</td></th>
+                <tr><th>No-Shows</th><td>{{.FailureCount}}</td></th>
+                <tr><th>Failures</th><td>{{.FailureCount}}</td></th>
                 <tr><th>Failure Rate</th><td>{{.FailureRate|percent}}</td></th>
-                <tr><th>Average Autonomous Hoops</th><td>{{.AverageAutonomousHoops}}</td></th>
+                <tr><th>Average Score</th><td>{{.AverageScore}}</td></th>
                 <tr><th>Average Teleoperated Hoops</th><td>{{.AverageTeleoperatedHoops}}</td></th>
+                <tr><th>Average Autonomous Hoops</th><td>{{.AverageAutonomousHoops}}</td></th>
+                <tr><th>Coop Bridge Attempt Rate</th><td>{{.CoopBridge.AttemptRate .MatchCount|percent}}</td></tr>
+                <tr><th>Coop Bridge Success Rate</th><td>{{.CoopBridge.SuccessRate|percent}}</td></tr>
+                <tr><th>Bridge 1 Attempt Rate</th><td>{{.TeamBridge1.AttemptRate .MatchCount|percent}}</td></tr>
+                <tr><th>Bridge 1 Success Rate</th><td>{{.TeamBridge1.SuccessRate|percent}}</td></tr>
+                <tr><th>Bridge 2 Attempt Rate</th><td>{{.TeamBridge2.AttemptRate .MatchCount|percent}}</td></tr>
+                <tr><th>Bridge 2 Success Rate</th><td>{{.TeamBridge2.SuccessRate|percent}}</td></tr>
             </table>
             {{end}}
 
