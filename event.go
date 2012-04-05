@@ -172,6 +172,7 @@ func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) err
 		teamInfo.TeamBridge1 = form.TeamBridge1
 		teamInfo.TeamBridge2 = form.TeamBridge2
 		teamInfo.ScoutName = form.ScoutName
+		teamInfo.Score = CalculateScore(teamInfo.Autonomous, teamInfo.Teleoperated, teamInfo.CoopBridge, teamInfo.TeamBridge1, teamInfo.TeamBridge2)
 		if err := server.Store().UpdateMatchTeam(MatchTag{event.Tag(), match.Type, uint(match.Number)}, teamNumber, *teamInfo); err != nil {
 			return err
 		}
