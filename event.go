@@ -344,7 +344,7 @@ func eventSpreadsheet(server *Server, w http.ResponseWriter, req *http.Request) 
 			strconv.Itoa(teamNum),
 			strconv.Itoa(stats.MatchCount),
 			strconv.Itoa(stats.NoShowCount),
-			strconv.Itoa(stats.Failures),
+			strconv.Itoa(stats.FailureCount),
 			strconv.FormatFloat(stats.FailureRate(), 'f', -1, 64),
 			strconv.FormatFloat(stats.AverageScore(), 'f', -1, 64),
 			strconv.FormatFloat(stats.AverageTeleoperatedHoops(), 'f', -1, 64),

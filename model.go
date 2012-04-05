@@ -303,8 +303,8 @@ type TeamStats struct {
 	MatchCount  int
 	TotalPoints int
 
-	NoShowCount int
-	Failures    int
+	NoShowCount  int
+	FailureCount int
 
 	AutonomousHoops   HoopCount
 	TeleoperatedHoops HoopCount
@@ -323,7 +323,7 @@ func (stats TeamStats) FailureRate() float64 {
 	if stats.MatchCount == 0 {
 		return 0.0
 	}
-	return float64(stats.Failures) / float64(stats.MatchCount)
+	return float64(stats.FailureCount) / float64(stats.MatchCount)
 }
 
 // AverageTeleoperatedHoops returns the average number of hoops scored per match.  Returns 0.0 if match count is zero.
