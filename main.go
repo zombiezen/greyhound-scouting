@@ -6,6 +6,7 @@ import (
 	"launchpad.net/mgo"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
@@ -18,6 +19,7 @@ var (
 	mongoURL  string
 	database  string
 	address   string
+	imagedir  string
 	staticdir string
 	debug     bool
 )
@@ -37,6 +39,7 @@ func parseFlags() {
 	flag.StringVar(&database, "database", "scouting", "The database name in the MongoDB instance to use")
 	flag.StringVar(&address, "address", ":8080", "The address to listen for connections")
 	flag.StringVar(&staticdir, "staticdir", "static", "The directory to serve static files from")
+	flag.StringVar(&imagedir, "imagedir", "images", "The directory to serve team images from")
 	flag.BoolVar(&debug, "debug", false, "Display extra information in-browser about the program")
 	flag.Parse()
 }
@@ -48,6 +51,7 @@ func createServer() {
 	}
 
 	server = NewServer(mongoDatastore{session.DB(database)})
+	server.imagestore = directoryImagestore{imagedir, &url.URL{Path: "/team/images/"}}
 	server.Debug = debug
 }
 
@@ -81,12 +85,18 @@ func addRoutes() {
 	matchRouter.Handle("/match-sheet.pdf", server.Handler(matchSheet)).Name("match.sheet")
 	matchRouter.Handle("/+edit/{teamNumber:[1-9][0-9]*}", server.Handler(editMatchTeam)).Name("match.editTeam")
 
-	staticServer := http.FileServer(http.Dir(staticdir))
-	server.HandleFunc("/static{path:/.*}", func(w http.ResponseWriter, req *http.Request) {
+	server.Handle("/static{path:/.*}", makeStaticHandler(http.Dir(staticdir))).Name("static")
+	server.Handle("/team/images{path:/.*}", makeStaticHandler(http.Dir(imagedir))).Name("teamImages")
+}
+
+// makeStaticHandler returns a new HTTP handler that uses the Gorilla router 'path' variable.
+func makeStaticHandler(fs http.FileSystem) http.Handler {
+	s := http.FileServer(fs)
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)
 		req.URL.Path = "/" + vars["path"]
-		staticServer.ServeHTTP(w, req)
-	}).Name("static")
+		s.ServeHTTP(w, req)
+	})
 }
 
 func index(server *Server, w http.ResponseWriter, req *http.Request) error {

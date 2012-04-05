@@ -8,20 +8,22 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
 type Server struct {
 	*mux.Router
-	datastore Datastore
-	templates *template.Template
-	Debug     bool
+	datastore  Datastore
+	imagestore Imagestore
+	templates  *template.Template
+	Debug      bool
 }
 
-func NewServer(store Datastore) *Server {
+func NewServer(datastore Datastore) *Server {
 	server := &Server{
 		Router:    new(mux.Router),
-		datastore: store,
+		datastore: datastore,
 		templates: template.New(""),
 		Debug:     true,
 	}
@@ -47,6 +49,13 @@ func NewServer(store Datastore) *Server {
 				}
 			}
 			return m, nil
+		},
+		"teamimage": func(num int) (*url.URL, error) {
+			u, err := server.imagestore.TeamImageURL(num)
+			if err == StoreNotFound {
+				return nil, nil
+			}
+			return u, err
 		},
 	})
 	return server

@@ -125,10 +125,12 @@ header {
 
 @media screen {
   #robot_info {
-    position: absolute;
-    left: 50%;
+    width: 45%;
     float: right;
     margin-left: 2em; } }
+
+#links {
+  clear: both; }
 
 .listing .odd .red_alliance {
   background: #ee707f; }

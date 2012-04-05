@@ -34,7 +34,9 @@
             <section id="robot_info">
                 <h2 id="robot">Robot Info</h2>
 
-                {{/* TODO: Image */}}
+                {{with teamimage $.Team.Number}}
+                <p><img src="{{.}}" height="256" alt="Team {{$.Team.Number}}'s Robot"></p>
+                {{end}}
 
                 <table class="info">
                     {{with .Name}}<tr><th>Name</th><td>{{.}}</td></tr>{{end}}
@@ -60,7 +62,7 @@
 
             {{/* TODO: Overall Statistics */}}
 
-            <h2>Links</h2>
+            <h2 id="links">Links</h2>
 
             <div id="copy">
                 <ul>

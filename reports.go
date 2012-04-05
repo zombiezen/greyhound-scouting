@@ -191,7 +191,7 @@ type teamEventStatser interface {
 }
 
 // renderMatchSheet creates a PDF document for a single match sheet.
-func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *Event, match *Match, statser teamEventStatser) error {
+func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *Event, match *Match, statser teamEventStatser, imagestore Imagestore) error {
 	const (
 		entryHeight  = 3 * pdf.Inch
 		numEntryRows = 3
@@ -258,6 +258,7 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 			},
 			teamInfo,
 			stats,
+			imagestore,
 		)
 	}
 	for i, teamInfo := range blue.Teams {
@@ -276,6 +277,7 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 			},
 			teamInfo,
 			stats,
+			imagestore,
 		)
 	}
 
@@ -283,10 +285,11 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 }
 
 // renderMatchSheetTeam renders a single team onto a match sheet.
-func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo, stats TeamStats) {
+func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo, stats TeamStats, imagestore Imagestore) {
 	const (
 		padding     = 0.125 * pdf.Inch
 		statPadding = 0.0625 * pdf.Inch
+		imageHeight = 1.5 * pdf.Inch
 	)
 
 	rect.Min.X += padding
@@ -308,7 +311,29 @@ func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo,
 	baseline := rect.Max.Y - teamNumberStyle.FontSize
 	teamNumberStyle.Drawf(canvas, pdf.Point{rect.Min.X, baseline}, "%d", info.Team)
 
-	// TODO: image
+	// Image
+	if imagestore != nil {
+		if img, err := ReadTeamImage(imagestore, info.Team); err == nil {
+			var ir pdf.Rectangle
+			placeAspect := float32(rect.Dx() / imageHeight)
+			imageAspect := float32(img.Bounds().Dx()) / float32(img.Bounds().Dy())
+			ir.Max.Y = baseline
+			if placeAspect >= imageAspect {
+				// Place is wider than image aspect
+				w := imageHeight * pdf.Unit(imageAspect)
+				ir.Min.X = (rect.Min.X + rect.Max.X - w) / 2
+				ir.Max.X = ir.Min.X + w
+				ir.Min.Y = ir.Max.Y - imageHeight
+			} else {
+				// Image is wider than place aspect
+				ir.Min.X = rect.Min.X
+				ir.Max.X = rect.Max.X
+				ir.Min.Y = ir.Max.Y - ir.Dx()/pdf.Unit(imageAspect)
+			}
+			canvas.DrawImage(img, ir)
+			baseline = ir.Min.Y
+		}
+	}
 
 	// Stats
 	statStyle := textStyle{pdf.Helvetica, 12, 0, 0, 0}
