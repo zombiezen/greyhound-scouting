@@ -40,8 +40,8 @@
                     <tbody>
                         {{range .Match.AlliancePairs}}
                         <tr class="team_header">
-                            {{template "match-headerCell.html" .Red}}
-                            {{template "match-headerCell.html" .Blue}}
+                            {{template "match-headerCell.html" map "Event" $.Event "Match" $.Match "TeamInfo" .Red}}
+                            {{template "match-headerCell.html" map "Event" $.Event "Match" $.Match "TeamInfo" .Blue}}
                         </tr>
 
                         <tr>
@@ -83,15 +83,16 @@
 </html>
 
 {{define "match-headerCell.html"}}
-    <th class="{{.Alliance}}_alliance team_num">
-        {{with .Team}}
+    <th class="{{.TeamInfo.Alliance}}_alliance team_num">
+        {{with .TeamInfo.Team}}
             <a href="{{route "team.view" "number" .}}">{{.}}</a>
+            <a class="edit_link" href="{{route "match.editTeam" "year" $.Event.Date.Year "location" $.Event.Location.Code "matchType" $.Match.Type "matchNumber" $.Match.Number "teamNumber" .}}">edit</a>
         {{else}}
             &nbsp;
         {{end}}
     </th>
-    <th class="{{.Alliance}}_alliance score" colspan="3">
-        {{with .Score}}{{.}}{{else}}&nbsp;{{end}}
+    <th class="{{.TeamInfo.Alliance}}_alliance score" colspan="3">
+        {{with .TeamInfo.Score}}{{.}}{{else}}&nbsp;{{end}}
     </th>
 {{end}}
 

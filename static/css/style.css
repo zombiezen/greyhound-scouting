@@ -76,6 +76,8 @@ header {
       background: #ee707f; }
     #match_teams .team_header > th.blue_alliance {
       background: #bcbfe4; }
+    #match_teams .team_header .edit_link {
+      font-size: 65%; }
 
 td.red_alliance, th.red_alliance {
   background: #b01527; }
