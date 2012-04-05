@@ -37,4 +37,6 @@ static/css/%.css: sass/%.scss
 	mkdir -p static/css
 	sass $< $@
 
+static/css/all.css: sass/reset.scss sass/layout.scss sass/style.scss
+
 .PHONY: all clean
