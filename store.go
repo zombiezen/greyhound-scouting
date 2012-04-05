@@ -24,6 +24,7 @@ type Datastore interface {
 
 	TeamEventStats(EventTag, int) (TeamStats, error)
 
+	UpdateMatchScore(MatchTag, int, int) error
 	UpdateMatchTeam(MatchTag, int, TeamInfo) error
 
 	UpsertTeam(*Team) error
@@ -174,6 +175,13 @@ func (store mongoDatastore) UpsertEvent(event *Event) error {
 func (store mongoDatastore) UpsertMatch(etag EventTag, match *Match) error {
 	_, err := store.C(matchCollection(etag)).Upsert(bson.M{"type": match.Type, "number": match.Number}, match)
 	return err
+}
+
+func (store mongoDatastore) UpdateMatchScore(tag MatchTag, red int, blue int) error {
+	return store.C(matchCollection(tag.EventTag)).Update(
+		bson.M{"type": tag.MatchType, "number": tag.MatchNumber},
+		bson.M{"$set": bson.M{"score.red": red, "score.blue": blue}},
+	)
 }
 
 func (store mongoDatastore) UpdateMatchTeam(tag MatchTag, teamNumber int, info TeamInfo) error {

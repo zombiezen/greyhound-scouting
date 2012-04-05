@@ -24,40 +24,49 @@
                 <h2>{{with .Event}}<a href="{{route "event.view" "year" .Date.Year "location" .Location.Code}}">{{.Location.Name}} ({{.Date.Year}})</a>{{end}}</h2>
             </hgroup>
 
-            <table id="match_teams">
-                <thead>
-                    <th class="red_alliance" scope="col" colspan="4">Red{{with .Match.Score}}: {{.red}}{{end}}</th>
-                    <th class="blue_alliance" scope="col" colspan="4">Blue{{with .Match.Score}}: {{.blue}}{{end}}</th>
-                </thead>
-                <tbody>
-                    {{range .Match.AlliancePairs}}
-                    <tr class="team_header">
-                        {{template "match-headerCell.html" .Red}}
-                        {{template "match-headerCell.html" .Blue}}
-                    </tr>
+            <form method="POST" action="{{route "match.score" "year" .Event.Date.Year "location" .Event.Location.Code "matchType" .Match.Type "matchNumber" .Match.Number}}">
+                <table id="match_teams">
+                    <thead>
+                        <th class="red_alliance" scope="col" colspan="4">
+                            Red
+                            <input type="text" name="RedScore" value="{{with .Match.Score}}{{.red}}{{else}}0{{end}}" size="5">
+                        </th>
+                        <th class="blue_alliance" scope="col" colspan="4">
+                            Blue
+                            <input type="text" name="BlueScore" value="{{with .Match.Score}}{{.blue}}{{else}}0{{end}}" size="5">
+                            <input type="submit" value="Save">
+                        </th>
+                    </thead>
+                    <tbody>
+                        {{range .Match.AlliancePairs}}
+                        <tr class="team_header">
+                            {{template "match-headerCell.html" .Red}}
+                            {{template "match-headerCell.html" .Blue}}
+                        </tr>
 
-                    <tr>
-                        {{template "match-hoopCountCellPair.html" map "Label" "Autonomous" "Red" .Red.Autonomous "Blue" .Blue.Autonomous}}
-                    </tr>
+                        <tr>
+                            {{template "match-hoopCountCellPair.html" map "Label" "Autonomous" "Red" .Red.Autonomous "Blue" .Blue.Autonomous}}
+                        </tr>
 
-                    <tr>
-                        {{template "match-hoopCountCellPair.html" map "Label" "Teleoperated" "Red" .Red.Teleoperated "Blue" .Blue.Teleoperated}}
-                    </tr>
+                        <tr>
+                            {{template "match-hoopCountCellPair.html" map "Label" "Teleoperated" "Red" .Red.Teleoperated "Blue" .Blue.Teleoperated}}
+                        </tr>
 
-                    <tr>
-                        {{template "match-bridgeCellPair.html" map "Label" "Coop" "Red" .Red.CoopBridge "Blue" .Blue.CoopBridge}}
-                    </tr>
+                        <tr>
+                            {{template "match-bridgeCellPair.html" map "Label" "Coop" "Red" .Red.CoopBridge "Blue" .Blue.CoopBridge}}
+                        </tr>
 
-                    <tr>
-                        {{template "match-bridgeCellPair.html" map "Label" "Bridge 1" "Red" .Red.TeamBridge1 "Blue" .Blue.TeamBridge1}}
-                    </tr>
-                    <tr>
-                        {{template "match-bridgeCellPair.html" map "Label" "Bridge 2" "Red" .Red.TeamBridge2 "Blue" .Blue.TeamBridge2}}
-                    </tr>
+                        <tr>
+                            {{template "match-bridgeCellPair.html" map "Label" "Bridge 1" "Red" .Red.TeamBridge1 "Blue" .Blue.TeamBridge1}}
+                        </tr>
+                        <tr>
+                            {{template "match-bridgeCellPair.html" map "Label" "Bridge 2" "Red" .Red.TeamBridge2 "Blue" .Blue.TeamBridge2}}
+                        </tr>
 
-                    {{end}}
-                </tbody>
-            </table>
+                        {{end}}
+                    </tbody>
+                </table>
+            </form>
 
             {{/* TODO: Video */}}
 

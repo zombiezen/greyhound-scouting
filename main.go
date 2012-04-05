@@ -109,6 +109,7 @@ func addRoutes() {
 	matchRouter := eventRouter.PathPrefix("/match/{matchType:qualification|quarter|semifinal|final}/{matchNumber:[1-9][0-9]*}").Subrouter()
 	matchRouter.Handle("/", server.Handler(viewMatch)).Name("match.view")
 	matchRouter.Handle("/match-sheet.pdf", server.Handler(matchSheet)).Name("match.sheet")
+	matchRouter.Handle("/+score", server.Handler(scoreMatch)).Name("match.score")
 	matchRouter.Handle("/+edit/{teamNumber:[1-9][0-9]*}", server.Handler(editMatchTeam)).Name("match.editTeam")
 
 	server.Handle("/static{path:/.*}", makeStaticHandler(http.Dir(staticdir))).Name("static")

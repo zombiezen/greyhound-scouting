@@ -108,6 +108,60 @@ func viewMatch(server *Server, w http.ResponseWriter, req *http.Request) error {
 	})
 }
 
+func scoreMatch(server *Server, w http.ResponseWriter, req *http.Request) error {
+	vars := mux.Vars(req)
+
+	var form struct {
+		RedScore  int
+		BlueScore int
+	}
+
+	// Fetch event
+	event, err := server.Store().FetchEvent(routeEventTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Fetch match
+	match, err := server.Store().FetchMatch(routeMatchTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Parse forms
+	if req.Method == "POST" {
+		if err := req.ParseForm(); err != nil {
+			// TODO: Bad request status code
+			return err
+		}
+
+		d := schema.NewDecoder()
+		if err := d.Decode(&form, req.Form); err != nil {
+			return err
+		}
+		// TODO: Show errors in validation
+
+		// Save
+		if err := server.Store().UpdateMatchScore(MatchTag{event.Tag(), match.Type, uint(match.Number)}, form.RedScore, form.BlueScore); err != nil {
+			return err
+		}
+	}
+
+	// Redirect
+	u, err := server.GetRoute("match.view").URL("year", strconv.Itoa(event.Date.Year), "location", event.Location.Code, "matchType", string(match.Type), "matchNumber", strconv.Itoa(match.Number))
+	if err != nil {
+		return err
+	}
+	http.Redirect(w, req, u.String(), http.StatusFound)
+	return nil
+}
+
 func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 
