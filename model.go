@@ -177,8 +177,8 @@ func (slice byMatchOrder) Swap(i, j int) {
 }
 
 func (slice byMatchOrder) Less(i, j int) bool {
-	if slice[i].Type.Less(slice[j].Type) {
-		return true
+	if slice[i].Type != slice[j].Type {
+		return slice[i].Type.Less(slice[j].Type)
 	}
 	return slice[i].Number < slice[j].Number
 }
