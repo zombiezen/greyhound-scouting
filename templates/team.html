@@ -48,7 +48,7 @@
 
             <h2 id="events">Registered Events</h2>
             {{range .Stats}}
-            {{with .EventTag}}<h3>{{.Year}}{{.LocationCode}}</h3>{{end}}
+            {{with .EventTag}}<h3><a href="{{route "event.view" "year" .Year "location" .LocationCode}}">{{.}}</a></h3>{{end}}
             {{/* TODO: See matches... */}}
 
             <table class="info">
