@@ -36,6 +36,7 @@ var eventTagTests = []tagTest{
 	{"sdc201", nil},
 	{"sdc2a11", nil},
 	{"sdc2011a", nil},
+	{"SDC2011", nil},
 }
 
 func TestParseEventTag(t *testing.T) {
@@ -63,6 +64,7 @@ var matchTagTests = []tagTest{
 	{"sdc201100421", nil},
 	{"sdc20110042a", nil},
 	{"sdc201100a2", nil},
+	{"SDC20113042", nil},
 }
 
 func TestParseMatchTag(t *testing.T) {
@@ -84,6 +86,7 @@ var matchTeamTagTests = []tagTest{
 	{"sdc201100421", MatchTeamTag{MatchTag{EventTag{"sdc", 2011}, Qualification, 42}, 1}},
 	{"sdc20110042973", MatchTeamTag{MatchTag{EventTag{"sdc", 2011}, Qualification, 42}, 973}},
 	{"sdc201100421a", nil},
+	{"SDC201100421", nil},
 }
 
 func TestParseMatchTeamTag(t *testing.T) {
