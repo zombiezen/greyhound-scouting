@@ -20,15 +20,47 @@ const (
 	finalDigit
 )
 
+// A TagError is a tag parsing error.
+type TagError struct {
+	Tag     string
+	BadPart string
+	Err     error
+}
+
+func (e TagError) Error() string {
+	if e.BadPart != "" {
+		return fmt.Sprintf("Invalid tag %q: %v (at %q)", e.Tag, e.BadPart, e.Err)
+	}
+	return fmt.Sprintf("Invalid tag %q: %v", e.Tag, e.Err)
+}
+
+// wrapTagError returns a TagError containing e, or e if it is already a
+// TagError.  The tag of the resulting error is always tag.  If e is nil, nil
+// is returned.
+func wrapTagError(e error, tag string) error {
+	if e == nil {
+		return e
+	}
+	if tagErr, ok := e.(TagError); ok {
+		tagErr.Tag = tag
+		return tagErr
+	}
+	return TagError{Tag: tag, Err: e}
+}
+
 type EventTag struct {
 	LocationCode string
 	Year         uint
 }
 
 func ParseEventTag(s string) (tag EventTag, err error) {
+	defer func(tag string) {
+		err = wrapTagError(err, tag)
+	}(s)
+
 	tag, s, err = parseEvent(s)
 	if err == nil && s != "" {
-		err = fmt.Errorf("Extra data at end of event tag: \"%s\"", s)
+		err = TagError{BadPart: s, Err: errors.New("Extra data at end of event tag")}
 	}
 	return
 }
@@ -45,23 +77,23 @@ func parseEvent(s string) (tag EventTag, remaining string, err error) {
 	// Ensure location is found
 	tag.LocationCode = s[:index]
 	if tag.LocationCode == "" {
-		err = errors.New("Tag must begin with a location code")
+		err = TagError{Err: errors.New("Tag must begin with a location code")}
 		return
 	}
 	if !isLowerString(tag.LocationCode) {
-		err = errors.New("Location code must be lowercase")
+		err = TagError{BadPart: tag.LocationCode, Err: errors.New("Location code must be lowercase")}
 		return
 	}
 	remaining = s[index:]
 
 	// Parse 4-digit year
 	if len(remaining) < yearWidth {
-		err = fmt.Errorf("%d-digit year must follow location code", yearWidth)
+		err = TagError{BadPart: remaining, Err: fmt.Errorf("%d-digit year must follow location code", yearWidth)}
 		return
 	}
 	year64, err := strconv.ParseUint(remaining[:yearWidth], 10, 0)
 	if err != nil {
-		err = fmt.Errorf("%d-digit year must follow location code", yearWidth)
+		err = TagError{BadPart: remaining[:yearWidth], Err: err}
 		return
 	}
 	tag.Year = uint(year64)
@@ -90,13 +122,17 @@ type MatchTag struct {
 }
 
 func ParseMatchTag(s string) (tag MatchTag, err error) {
+	defer func(tag string) {
+		err = wrapTagError(err, tag)
+	}(s)
+
 	tag.EventTag, s, err = parseEvent(s)
 	if err != nil {
 		return
 	}
 	tag.MatchType, tag.MatchNumber, s, err = parseMatch(s)
 	if err == nil && s != "" {
-		err = fmt.Errorf("Extra data at end of match tag: \"%s\"", s)
+		err = TagError{BadPart: s, Err: errors.New("Extra data at end of event tag")}
 	}
 	return
 }
@@ -104,7 +140,7 @@ func ParseMatchTag(s string) (tag MatchTag, err error) {
 func parseMatch(s string) (matchType MatchType, matchNumber uint, remaining string, err error) {
 	// Parse match type
 	if len(s) == 0 {
-		err = errors.New("Missing one-digit match type")
+		err = TagError{Err: errors.New("Missing one-digit match type")}
 		return
 	}
 	digit, remaining := s[0], s[1:]
@@ -118,7 +154,7 @@ func parseMatch(s string) (matchType MatchType, matchNumber uint, remaining stri
 	case finalDigit:
 		matchType = Final
 	default:
-		err = errors.New("Match type must be 0, 1, 2, or 3")
+		err = TagError{BadPart: string(s[0]), Err: errors.New("Match type must be 0, 1, 2, or 3")}
 		return
 	}
 
@@ -166,6 +202,10 @@ type MatchTeamTag struct {
 }
 
 func ParseMatchTeamTag(s string) (tag MatchTeamTag, err error) {
+	defer func(tag string) {
+		err = wrapTagError(err, tag)
+	}(s)
+
 	tag.EventTag, s, err = parseEvent(s)
 	if err != nil {
 		return
@@ -176,7 +216,7 @@ func ParseMatchTeamTag(s string) (tag MatchTeamTag, err error) {
 	}
 	teamNumber64, err := strconv.ParseUint(s, 10, 0)
 	if err != nil {
-		err = fmt.Errorf("Extra data at end of match team tag: \"%s\"", s)
+		err = TagError{BadPart: s, Err: errors.New("Extra data at end of match team tag")}
 	}
 	tag.TeamNumber = uint(teamNumber64)
 	return
