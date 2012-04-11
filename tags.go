@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
+	"unicode"
 )
 
 const (
@@ -46,6 +48,10 @@ func parseEvent(s string) (tag EventTag, remaining string, err error) {
 		err = errors.New("Tag must begin with a location code")
 		return
 	}
+	if !isLowerString(tag.LocationCode) {
+		err = errors.New("Location code must be lowercase")
+		return
+	}
 	remaining = s[index:]
 
 	// Parse 4-digit year
@@ -62,6 +68,11 @@ func parseEvent(s string) (tag EventTag, remaining string, err error) {
 	remaining = remaining[yearWidth:]
 
 	return
+}
+
+// isLowerString returns true if and only if s contains only lowercase letters.
+func isLowerString(s string) bool {
+	return strings.IndexFunc(s, func(r rune) bool { return !unicode.IsLower(r) }) == -1
 }
 
 func (tag EventTag) String() string {

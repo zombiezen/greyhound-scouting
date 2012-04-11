@@ -270,6 +270,9 @@ func importSchedule() {
 		if flag.Arg(2) == "" {
 			log.Fatal("Location code must be non-empty")
 		}
+		if !isLowerString(flag.Arg(2)) {
+			log.Fatal("Location code must only have lowercase letters")
+		}
 
 		// Upsert event
 		etag = EventTag{flag.Arg(2), uint(year)}
