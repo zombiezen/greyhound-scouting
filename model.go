@@ -303,8 +303,12 @@ type TeamStats struct {
 	MatchCount  int
 	TotalPoints int
 
-	NoShowCount int
-	Failures    int
+	NoShowCount  int
+	FailureCount int
+
+	CoopBridge  BridgeStats
+	TeamBridge1 BridgeStats
+	TeamBridge2 BridgeStats
 
 	AutonomousHoops   HoopCount
 	TeleoperatedHoops HoopCount
@@ -323,7 +327,7 @@ func (stats TeamStats) FailureRate() float64 {
 	if stats.MatchCount == 0 {
 		return 0.0
 	}
-	return float64(stats.Failures) / float64(stats.MatchCount)
+	return float64(stats.FailureCount) / float64(stats.MatchCount)
 }
 
 // AverageTeleoperatedHoops returns the average number of hoops scored per match.  Returns 0.0 if match count is zero.
@@ -340,4 +344,36 @@ func (stats TeamStats) AverageAutonomousHoops() float64 {
 		return 0.0
 	}
 	return float64(stats.AutonomousHoops.Total()) / float64(stats.MatchCount)
+}
+
+// BridgeStats holds team statistics for a particular bridge.
+type BridgeStats struct {
+	AttemptCount int
+	SuccessCount int
+}
+
+// AttemptRate returns the number of attempts divided by matchCount.  Returns 0.0 if matchCount is zero.
+func (stats BridgeStats) AttemptRate(matchCount int) float64 {
+	if matchCount == 0 {
+		return 0.0
+	}
+	return float64(stats.AttemptCount) / float64(matchCount)
+}
+
+// SuccessRate returns the number of successes divided by the number of attempts.  Returns 0.0 if number of attempts is zero.
+func (stats BridgeStats) SuccessRate() float64 {
+	if stats.AttemptCount == 0 {
+		return 0.0
+	}
+	return float64(stats.SuccessCount) / float64(stats.AttemptCount)
+}
+
+// addBridge adds a single bridge to stats.
+func (stats *BridgeStats) add(b Bridge) {
+	if b.Attempted {
+		stats.AttemptCount++
+	}
+	if b.Success {
+		stats.SuccessCount++
+	}
 }

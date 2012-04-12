@@ -154,10 +154,13 @@ func (store mongoDatastore) TeamEventStats(tag EventTag, number int) (TeamStats,
 		stats.MatchCount++
 		stats.TotalPoints += match.Teams[i].Score
 		if match.Teams[i].Failure {
-			stats.Failures++
+			stats.FailureCount++
 		}
 		stats.AutonomousHoops.Add(match.Teams[i].Autonomous)
 		stats.TeleoperatedHoops.Add(match.Teams[i].Teleoperated)
+		stats.CoopBridge.add(match.Teams[i].CoopBridge)
+		stats.TeamBridge1.add(match.Teams[i].TeamBridge1)
+		stats.TeamBridge2.add(match.Teams[i].TeamBridge2)
 	}
 	return stats, iter.Err()
 }
