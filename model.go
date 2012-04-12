@@ -166,6 +166,16 @@ func (match *Match) Winner() Alliance {
 	return ""
 }
 
+// TeamInfo returns the team info for a particular team.
+func (match *Match) TeamInfo(teamNum int) *TeamInfo {
+	for i := range match.Teams {
+		if match.Teams[i].Team == teamNum {
+			return &match.Teams[i]
+		}
+	}
+	return nil
+}
+
 type byMatchOrder []*Match
 
 func (slice byMatchOrder) Len() int {

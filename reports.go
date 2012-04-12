@@ -25,20 +25,24 @@ func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight pdf.Unit,
 	n := 0
 	sizeX, sizeY := pageWidth-reportMargin*2, (pageHeight-reportMargin*2)/scoutFormsPerPage
 
-	var canvas *pdf.Canvas
-	for _, match := range matches {
-		// Retrieve the list of teams (in sorted order, red first, then blue)
-		teamList := make([]TeamInfo, 0, len(match.Teams))
-		teamList = append(teamList, match.AllianceInfo(Red).Teams...)
-		teamList = append(teamList, match.AllianceInfo(Blue).Teams...)
+	// Get map of teams to matches
+	teamMatches := make(map[int][]*Match, len(event.Teams))
+	for _, m := range matches {
+		for i := range m.Teams {
+			teamMatches[m.Teams[i].Team] = append(teamMatches[m.Teams[i].Team], m)
+		}
+	}
 
-		for _, info := range teamList {
+	var canvas *pdf.Canvas
+	for _, team := range event.Teams {
+		for _, match := range teamMatches[team] {
+			info := match.TeamInfo(team)
 			if canvas == nil {
 				canvas = doc.NewPage(pageWidth, pageHeight)
 				canvas.Translate(reportMargin, pageHeight-sizeY-reportMargin)
 			}
 			renderScoutForm(canvas, sizeX, sizeY, event, match, info.Team)
-			if n%scoutFormsPerPage == scoutFormsPerPage-1 {
+			if n == scoutFormsPerPage-1 {
 				canvas.Close()
 				canvas = nil
 			} else {
@@ -47,7 +51,14 @@ func renderMultipleScoutForms(doc *pdf.Document, pageWidth, pageHeight pdf.Unit,
 				canvas.DrawLine(pdf.Point{0, 0}, pdf.Point{sizeX, 0})
 				canvas.Translate(0, -pageHeight/scoutFormsPerPage)
 			}
-			n++
+			n = (n + 1) % scoutFormsPerPage
+		}
+
+		// Page break after team
+		if canvas != nil {
+			n = 0
+			canvas.Close()
+			canvas = nil
 		}
 	}
 
