@@ -70,6 +70,47 @@ func viewEvent(server *Server, w http.ResponseWriter, req *http.Request) error {
 	})
 }
 
+func teamMatches(server *Server, w http.ResponseWriter, req *http.Request) error {
+	vars := mux.Vars(req)
+
+	// Fetch event
+	event, err := server.Store().FetchEvent(routeEventTag(vars))
+	if err == StoreNotFound {
+		http.NotFound(w, req)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Ensure team is at event
+	teamNumber, _ := strconv.Atoi(vars["teamNumber"])
+	foundTeam := false
+	for _, t := range event.Teams {
+		if teamNumber == t {
+			foundTeam = true
+			break
+		}
+	}
+	if !foundTeam {
+		http.NotFound(w, req)
+		return nil
+	}
+
+	// Fetch matches
+	matches, err := server.Store().FetchMatches(event.Tag())
+	if err != nil {
+		return err
+	}
+
+	return server.Templates().ExecuteTemplate(w, "team-matches.html", map[string]interface{}{
+		"Server":     server,
+		"Request":    req,
+		"Event":      event,
+		"TeamNumber": teamNumber,
+		"Matches":    matches,
+	})
+}
+
 func routeMatchTag(vars map[string]string) MatchTag {
 	num64, _ := strconv.ParseUint(vars["matchNumber"], 10, 0)
 	return MatchTag{

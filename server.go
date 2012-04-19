@@ -29,6 +29,9 @@ func NewServer(datastore Datastore) *Server {
 	}
 	server.templates.Funcs(template.FuncMap{
 		"route": server.routeFunc(),
+		"eq": func(a, b interface{}) bool {
+			return a == b
+		},
 		"percent": func(x float64) string {
 			return fmt.Sprintf("%.1f%%", x*100)
 		},

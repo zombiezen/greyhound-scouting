@@ -105,6 +105,7 @@ func addRoutes() {
 	eventRouter.Handle("/", server.Handler(viewEvent)).Name("event.view")
 	eventRouter.Handle("/scout-forms.pdf", server.Handler(eventScoutForms)).Name("event.scoutForms")
 	eventRouter.Handle("/teams.csv", server.Handler(eventSpreadsheet)).Name("event.spreadsheet")
+	eventRouter.Handle("/team/{teamNumber:[1-9][0-9]*}", server.Handler(teamMatches)).Name("event.teamMatches")
 
 	matchRouter := eventRouter.PathPrefix("/match/{matchType:qualification|quarter|semifinal|final}/{matchNumber:[1-9][0-9]*}").Subrouter()
 	matchRouter.Handle("/", server.Handler(viewMatch)).Name("match.view")

@@ -22,6 +22,7 @@ type Datastore interface {
 
 	EventsForTeam(year int, number int) ([]EventTag, error)
 
+	TeamEventMatches(EventTag, int) ([]*Match, error)
 	TeamEventStats(EventTag, int) (TeamStats, error)
 
 	UpdateMatchScore(MatchTag, int, int) error
@@ -120,6 +121,16 @@ func (store mongoDatastore) EventsForTeam(year int, number int) ([]EventTag, err
 		tags[i] = events[i].Tag()
 	}
 	return tags, nil
+}
+
+func (store mongoDatastore) TeamEventMatches(tag EventTag, number int) ([]*Match, error) {
+	query := store.C(matchCollection(tag)).Find(bson.M{"teams.team": number}).Limit(matchLimit)
+	var matches []*Match
+	if err := query.All(&matches); err != nil {
+		return nil, err
+	}
+	sort.Sort(byMatchOrder(matches))
+	return matches, nil
 }
 
 // TeamEventStats returns team statistics for a single event.
