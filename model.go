@@ -85,7 +85,7 @@ type Alliance string
 
 const (
 	Red  Alliance = "red"
-	Blue          = "blue"
+	Blue Alliance = "blue"
 )
 
 func (alliance Alliance) String() string {
