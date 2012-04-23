@@ -65,39 +65,21 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>Coop Bridge Attempted:</th>
+                        <th>Coop Bridge:</th>
                         <td>
-                            <input name="CoopBridge.Attempted" type="checkbox" value="1"{{if .CoopBridge.Attempted}} checked="checked"{{end}}>
+                            <select name="CoopBridge" size="3">{{template "bridge-popup.html" .CoopBridge}}</select>
                         </td>
                     </tr>
                     <tr>
-                        <th>Coop Bridge Success:</th>
+                        <th>Bridge 1:</th>
                         <td>
-                            <input name="CoopBridge.Success" type="checkbox" value="1"{{if .CoopBridge.Success}} checked="checked"{{end}}>
+                            <select name="TeamBridge1" size="3">{{template "bridge-popup.html" .TeamBridge1}}</select>
                         </td>
                     </tr>
                     <tr>
-                        <th>Bridge 1 Attempted:</th>
+                        <th>Bridge 2:</th>
                         <td>
-                            <input name="TeamBridge1.Attempted" type="checkbox" value="1"{{if .TeamBridge1.Attempted}} checked="checked"{{end}}>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Bridge 1 Success:</th>
-                        <td>
-                            <input name="TeamBridge1.Success" type="checkbox" value="1"{{if .TeamBridge1.Success}} checked="checked"{{end}}>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Bridge 2 Attempted:</th>
-                        <td>
-                            <input name="TeamBridge2.Attempted" type="checkbox" value="1"{{if .TeamBridge2.Attempted}} checked="checked"{{end}}>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Bridge 2 Success:</th>
-                        <td>
-                            <input name="TeamBridge2.Success" type="checkbox" value="1"{{if .TeamBridge2.Success}} checked="checked"{{end}}>
+                            <select name="TeamBridge2" size="3">{{template "bridge-popup.html" .TeamBridge2}}</select>
                         </td>
                     </tr>
                     <tr>
@@ -124,3 +106,8 @@
 {{template "watermark.html"}}
 </html>
 
+{{define "bridge-popup.html"}}
+<option value="na"{{if or .Attempted .Success|not}} selected{{end}}>Not Attempted</option>
+<option value="fail"{{if not .Success|and .Attempted}} selected{{end}}>Failed</option>
+<option value="success"{{if and .Success .Attempted}} selected{{end}}>Success</option>
+{{end}}

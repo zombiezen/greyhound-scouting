@@ -7,6 +7,7 @@ import (
 	"encoding/csv"
 	"log"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -203,6 +204,18 @@ func scoreMatch(server *Server, w http.ResponseWriter, req *http.Request) error 
 	return nil
 }
 
+func convertBridgeString(s string) reflect.Value {
+	switch s {
+	case "na":
+		return reflect.ValueOf(Bridge{false, false})
+	case "fail":
+		return reflect.ValueOf(Bridge{true, false})
+	case "success":
+		return reflect.ValueOf(Bridge{true, true})
+	}
+	return reflect.Value{}
+}
+
 func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 
@@ -255,6 +268,7 @@ func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) err
 		}
 
 		d := schema.NewDecoder()
+		d.RegisterConverter(Bridge{}, convertBridgeString)
 		if err := d.Decode(&form, req.Form); err != nil {
 			return err
 		}
