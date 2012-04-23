@@ -67,7 +67,7 @@ header {
   #match_teams > thead > th {
     width: 50%; }
   #match_teams td {
-    width: 12.5%; }
+    width: 10%; }
   #match_teams .team_header {
     border-top: thin solid #333;
     border-bottom: thin solid #333;

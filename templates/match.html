@@ -27,11 +27,11 @@
             <form method="POST" action="{{route "match.score" "year" .Event.Date.Year "location" .Event.Location.Code "matchType" .Match.Type "matchNumber" .Match.Number}}">
                 <table id="match_teams">
                     <thead>
-                        <th class="red_alliance" scope="col" colspan="4">
+                        <th class="red_alliance" scope="col" colspan="5">
                             Red
                             <input type="text" name="RedScore" value="{{with .Match.Score}}{{.red}}{{else}}0{{end}}" size="5">
                         </th>
-                        <th class="blue_alliance" scope="col" colspan="4">
+                        <th class="blue_alliance" scope="col" colspan="5">
                             Blue
                             <input type="text" name="BlueScore" value="{{with .Match.Score}}{{.blue}}{{else}}0{{end}}" size="5">
                             <input type="submit" value="Save">
@@ -91,14 +91,14 @@
             &nbsp;
         {{end}}
     </th>
-    <th class="{{.TeamInfo.Alliance}}_alliance score" colspan="3">
+    <th class="{{.TeamInfo.Alliance}}_alliance score" colspan="4">
         {{with .TeamInfo.Score}}{{.}}{{else}}&nbsp;{{end}}
     </th>
 {{end}}
 
 {{define "match-labelPair.html"}}
-    <td class="red_alliance" colspan="4">{{.}}</td>
-    <td class="blue_alliance" colspan="4">{{.}}</td>
+    <td class="red_alliance" colspan="5">{{.}}</td>
+    <td class="blue_alliance" colspan="5">{{.}}</td>
 {{end}}
 
 {{define "match-cellPair.html"}}
@@ -108,7 +108,7 @@
 
 {{define "match-cell.html"}}
     <td class="{{.Alliance}}_alliance">{{.Label}}</td>
-    <td class="{{.Alliance}}_alliance" colspan="3">{{.Value}}</td>
+    <td class="{{.Alliance}}_alliance" colspan="4">{{.Value}}</td>
 {{end}}
 
 {{define "match-boolCellPair.html"}}
@@ -118,7 +118,7 @@
 
 {{define "match-boolCell.html"}}
     <td class="{{.Alliance}}_alliance">{{.Label}}</td>
-    <td class="{{.Alliance}}_alliance" colspan="3">{{if .Value}}Yes{{else}}No{{end}}</td>
+    <td class="{{.Alliance}}_alliance" colspan="4">{{if .Value}}Yes{{else}}No{{end}}</td>
 {{end}}
 
 {{define "match-hoopCountCell.html"}}
@@ -127,8 +127,9 @@
     <td class="{{$.Alliance}}_alliance">H {{.High}}</td>
     <td class="{{$.Alliance}}_alliance">M {{.Mid}}</td>
     <td class="{{$.Alliance}}_alliance">L {{.Low}}</td>
+    <td class="{{$.Alliance}}_alliance">Missed {{.Missed}}</td>
     {{else}}
-    <td class="{{$.Alliance}}_alliance" colspan="3">&nbsp;</td>
+    <td class="{{$.Alliance}}_alliance" colspan="4">&nbsp;</td>
     {{end}}
 {{end}}
 
@@ -140,7 +141,7 @@
 {{define "match-bridgeCell.html"}}
     <td class="{{.Alliance}}_alliance">{{.Label}}</td>
     {{with .Value}}
-        <td class="{{$.Alliance}}_alliance" colspan="3">
+        <td class="{{$.Alliance}}_alliance" colspan="4">
             {{if .Attempted}}
                 {{if .Success}}Success{{else}}Failed{{end}}
             {{else}}

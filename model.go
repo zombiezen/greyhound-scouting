@@ -221,9 +221,10 @@ const (
 
 // HoopCount stores how many hoops were scored per robot per phase.
 type HoopCount struct {
-	High int
-	Mid  int
-	Low  int
+	High   int
+	Mid    int
+	Low    int
+	Missed int
 }
 
 // score returns the score for a hoop count for the high, mid, and low score multipliers.
@@ -254,6 +255,7 @@ func (h1 *HoopCount) Add(h2 HoopCount) {
 	h1.High += h2.High
 	h1.Mid += h2.Mid
 	h1.Low += h2.Low
+	h1.Missed += h2.Missed
 }
 
 // Bridge stores a match bridge attempt.
