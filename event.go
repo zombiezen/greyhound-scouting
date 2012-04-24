@@ -359,7 +359,7 @@ func matchSheet(server *Server, w http.ResponseWriter, req *http.Request) error 
 
 	w.Header().Set("Content-Type", "application/pdf")
 	doc := pdf.New()
-	renderMatchSheet(doc, pdf.USLetterWidth, pdf.USLetterHeight, event, match, server.Store(), server.imagestore)
+	renderMatchSheet(doc, pdf.USLetterHeight, pdf.USLetterWidth, event, match, server.Store(), server.imagestore)
 	return doc.Encode(w)
 }
 

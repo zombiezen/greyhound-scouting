@@ -203,10 +203,8 @@ type teamEventStatser interface {
 
 // renderMatchSheet creates a PDF document for a single match sheet.
 func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *Event, match *Match, statser teamEventStatser, imagestore Imagestore) error {
-	const (
-		entryHeight  = 3 * pdf.Inch
-		numEntryRows = 3
-	)
+	const numEntryColumns = 3
+	entryWidth := (pageWidth - reportMargin * 2) / numEntryColumns
 
 	canvas := doc.NewPage(pageWidth, pageHeight)
 	defer canvas.Close()
@@ -214,47 +212,9 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 	red := match.AllianceInfo(Red)
 	blue := match.AllianceInfo(Blue)
 
-	// Heading
-	headingStyle := textStyle{matchNumberFontName, matchNumberFontSize, 0, 0, 0}
-	top := pageHeight - reportMargin - matchNumberFontSize
-	headingStyle.Drawf(canvas, pdf.Point{reportMargin, top}, "%s #%d - %s", match.Type.DisplayName(), match.Number, event.Location.Name)
-	top -= 0.25 * pdf.Inch
-
-	// Barcode
-	bc := &barcode.Image{
-		Barcode: barcode.Encode(MatchTag{event.Tag(), match.Type, uint(match.Number)}.String()),
-		Scale:   1,
-		Height:  24,
-	}
-	var bcRect pdf.Rectangle
-	bcRect.Min.X = pageWidth - reportMargin - pdf.Unit(bc.Bounds().Dx())
-	bcRect.Min.Y = pageHeight - reportMargin - pdf.Unit(bc.Bounds().Dy())
-	bcRect.Max.X = bcRect.Min.X + pdf.Unit(bc.Bounds().Dx())
-	bcRect.Max.Y = bcRect.Min.Y + pdf.Unit(bc.Bounds().Dy())
-	canvas.DrawImage(bc, bcRect)
-	top = bcRect.Min.Y - 0.25*pdf.Inch
-
-	// Cell borders
-	cellStyle := strokeStyle{1, 0, 0, 0}
-	base := top - entryHeight*numEntryRows
-	cellStyle.Rect(canvas, pdf.Rectangle{
-		pdf.Point{reportMargin, base},
-		pdf.Point{pageWidth - reportMargin, top},
-	})
-	cellStyle.Line(canvas,
-		pdf.Point{pageWidth / 2, base},
-		pdf.Point{pageWidth / 2, top},
-	)
-	for i := 1; i < numEntryRows; i++ {
-		cellStyle.Line(canvas,
-			pdf.Point{reportMargin, top - (pdf.Unit(i) * entryHeight)},
-			pdf.Point{pageWidth - reportMargin, top - (pdf.Unit(i) * entryHeight)},
-		)
-	}
-
 	// Teams
 	for i, teamInfo := range red.Teams {
-		if i >= numEntryRows {
+		if i >= numEntryColumns {
 			break
 		}
 		stats, err := statser.TeamEventStats(event.Tag(), teamInfo.Team)
@@ -264,8 +224,8 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 		renderMatchSheetTeam(
 			canvas,
 			pdf.Rectangle{
-				pdf.Point{reportMargin, top - (pdf.Unit(i+1) * entryHeight)},
-				pdf.Point{pageWidth / 2, top - (pdf.Unit(i) * entryHeight)},
+				pdf.Point{reportMargin + pdf.Unit(i) * entryWidth, pageHeight / 2},
+				pdf.Point{reportMargin + pdf.Unit(i+1) * entryWidth, pageHeight - reportMargin},
 			},
 			teamInfo,
 			stats,
@@ -273,7 +233,7 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 		)
 	}
 	for i, teamInfo := range blue.Teams {
-		if i >= numEntryRows {
+		if i >= numEntryColumns {
 			break
 		}
 		stats, err := statser.TeamEventStats(event.Tag(), teamInfo.Team)
@@ -283,8 +243,8 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 		renderMatchSheetTeam(
 			canvas,
 			pdf.Rectangle{
-				pdf.Point{pageWidth / 2, top - (pdf.Unit(i+1) * entryHeight)},
-				pdf.Point{pageWidth - reportMargin, top - (pdf.Unit(i) * entryHeight)},
+				pdf.Point{reportMargin + pdf.Unit(i) * entryWidth, reportMargin},
+				pdf.Point{reportMargin + pdf.Unit(i+1) * entryWidth, pageHeight / 2},
 			},
 			teamInfo,
 			stats,
@@ -292,15 +252,28 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 		)
 	}
 
+	// Match Number
+	matchStyle := textStyle{pdf.HelveticaBold, 18, 0, 0, 0}
+	var textObj pdf.Text
+	textObj.SetFont(matchStyle.FontName, matchStyle.FontSize)
+	//textObj.Text(fmt.Sprintf("%s %d", match.Type.DisplayName(), match.Number))
+	textObj.Text("Qualification 155")
+
+	canvas.SetColor(matchStyle.R, matchStyle.G, matchStyle.B)
+	canvas.Push()
+	canvas.Translate(pageWidth - reportMargin - textObj.X(), reportMargin)
+	canvas.DrawText(&textObj)
+	canvas.Pop()
+
 	return nil
 }
 
 // renderMatchSheetTeam renders a single team onto a match sheet.
 func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo, stats TeamStats, imagestore Imagestore) {
 	const (
-		padding     = 0.125 * pdf.Inch
+		padding     = 0.0625 * pdf.Inch
 		statPadding = 0.0625 * pdf.Inch
-		imageHeight = 1.5 * pdf.Inch
+		imageHeight = 2.5 * pdf.Inch
 	)
 
 	rect.Min.X += padding
@@ -308,27 +281,27 @@ func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo,
 	rect.Max.X -= padding
 	rect.Max.Y -= padding
 
-	// Team number
-	teamNumberStyle := textStyle{FontName: pdf.HelveticaBold, FontSize: 16}
+	// Image border
+	imageBorderStyle := fillStyle{}
 	if info.Alliance == Red {
-		teamNumberStyle.R = 0.69
-		teamNumberStyle.G = 0.08
-		teamNumberStyle.B = 0.15
+		imageBorderStyle.R = 0.69
+		imageBorderStyle.G = 0.08
+		imageBorderStyle.B = 0.15
 	} else {
-		teamNumberStyle.R = 0.31
-		teamNumberStyle.G = 0.34
-		teamNumberStyle.B = 0.72
+		imageBorderStyle.R = 0.31
+		imageBorderStyle.G = 0.34
+		imageBorderStyle.B = 0.72
 	}
-	baseline := rect.Max.Y - teamNumberStyle.FontSize
-	teamNumberStyle.Drawf(canvas, pdf.Point{rect.Min.X, baseline}, "%d", info.Team)
+	imageBorderRect := pdf.Rectangle{pdf.Point{rect.Min.X, rect.Max.Y - imageHeight}, rect.Max}
+	imageBorderStyle.Rect(canvas, imageBorderRect)
 
 	// Image
 	if imagestore != nil {
 		if img, err := ReadTeamImage(imagestore, info.Team); err == nil {
 			var ir pdf.Rectangle
-			placeAspect := float32(rect.Dx() / imageHeight)
+			placeAspect := float32(imageBorderRect.Dx()) / float32(imageBorderRect.Dy())
 			imageAspect := float32(img.Bounds().Dx()) / float32(img.Bounds().Dy())
-			ir.Max.Y = baseline
+			ir.Max.Y = imageBorderRect.Max.Y
 			if placeAspect >= imageAspect {
 				// Place is wider than image aspect
 				w := imageHeight * pdf.Unit(imageAspect)
@@ -342,24 +315,31 @@ func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo,
 				ir.Min.Y = ir.Max.Y - ir.Dx()/pdf.Unit(imageAspect)
 			}
 			canvas.DrawImage(img, ir)
-			baseline = ir.Min.Y
 		}
 	}
 
 	// Stats
-	statStyle := textStyle{pdf.Helvetica, 12, 0, 0, 0}
+	statStyle := textStyle{pdf.Helvetica, 8, 0, 0, 0}
 	var textObj pdf.Text
 	textObj.SetFont(statStyle.FontName, statStyle.FontSize)
+	textObj.Text(fmt.Sprintf("Team %d", info.Team))
+	textObj.NextLine()
 	textObj.Text(fmt.Sprintf("Matches Played: %d", stats.MatchCount))
 	textObj.NextLine()
 	if stats.MatchCount != 0 {
-		// TODO
+		textObj.Text(fmt.Sprintf("Avg Teleop Balls: %.1f / %.1f", stats.AverageTeleoperatedScored(), stats.AverageTeleoperatedShot()))
+		textObj.NextLine()
+		textObj.Text(fmt.Sprintf("Avg Auto Balls: %.1f / %.1f", stats.AverageAutonomousScored(), stats.AverageAutonomousShot()))
+		textObj.NextLine()
+		textObj.Text(fmt.Sprintf("Max Teleop Balls: %d / %d", stats.MaxTeleoperatedScored, stats.MaxTeleoperatedShot))
+		textObj.NextLine()
+		textObj.Text(fmt.Sprintf("Bridge: %d / %d", stats.CoopBridge.SuccessCount + stats.TeamBridge1.SuccessCount, stats.CoopBridge.AttemptCount + stats.TeamBridge1.SuccessCount))
+		textObj.NextLine()
 	}
 
-	baseline -= statStyle.FontSize + statPadding
 	canvas.SetColor(statStyle.R, statStyle.G, statStyle.B)
 	canvas.Push()
-	canvas.Translate(rect.Min.X, baseline)
+	canvas.Translate(rect.Min.X, imageBorderRect.Min.Y - (statStyle.FontSize + statPadding))
 	canvas.DrawText(&textObj)
 	canvas.Pop()
 }
@@ -411,4 +391,17 @@ func (style strokeStyle) Line(canvas *pdf.Canvas, pt1, pt2 pdf.Point) {
 	canvas.SetLineWidth(style.LineWidth)
 	canvas.SetStrokeColor(style.R, style.G, style.B)
 	canvas.Stroke(&path)
+}
+
+type fillStyle struct {
+	R, G, B   float32
+}
+
+// Rect fills a rectangle.
+func (style fillStyle) Rect(canvas *pdf.Canvas, rect pdf.Rectangle) {
+	var path pdf.Path
+	path.Rectangle(rect)
+
+	canvas.SetColor(style.R, style.G, style.B)
+	canvas.Fill(&path)
 }
