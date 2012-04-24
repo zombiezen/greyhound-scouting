@@ -9,6 +9,7 @@ type Team struct {
 	Name       string
 	RookieYear int `bson:"rookie_year"`
 	Robot      *Robot
+	OPR        float64
 }
 
 type Robot struct {
@@ -319,6 +320,7 @@ type TeamStats struct {
 	EventTag    EventTag
 	MatchCount  int
 	TotalPoints int
+	OPR         float64
 
 	NoShowCount  int
 	FailureCount int

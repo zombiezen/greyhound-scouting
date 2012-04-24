@@ -322,7 +322,7 @@ func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo,
 	statStyle := textStyle{pdf.Helvetica, 8, 0, 0, 0}
 	var textObj pdf.Text
 	textObj.SetFont(statStyle.FontName, statStyle.FontSize)
-	textObj.Text(fmt.Sprintf("Team %d", info.Team))
+	textObj.Text(fmt.Sprintf("Team %d (OPR %.2f)", info.Team, stats.OPR))
 	textObj.NextLine()
 	textObj.Text(fmt.Sprintf("Matches Played: %d", stats.MatchCount))
 	textObj.NextLine()

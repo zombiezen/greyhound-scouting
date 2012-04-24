@@ -135,9 +135,15 @@ func (store mongoDatastore) TeamEventMatches(tag EventTag, number int) ([]*Match
 
 // TeamEventStats returns team statistics for a single event.
 func (store mongoDatastore) TeamEventStats(tag EventTag, number int) (TeamStats, error) {
+	var stats TeamStats
+
+	var team Team
+	if err := store.fetchOne(teamCollection, bson.M{"_id": number}, &team); err == nil {
+		stats.OPR = team.OPR
+	}
+
 	iter := store.C(matchCollection(tag)).Find(bson.M{"teams.team": number}).Limit(matchLimit).Iter()
 
-	var stats TeamStats
 	var match Match
 	stats.EventTag = tag
 	for iter.Next(&match) {

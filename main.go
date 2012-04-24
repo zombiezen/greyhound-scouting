@@ -46,8 +46,10 @@ func main() {
 			importTeams()
 		case "schedule":
 			importSchedule()
+		case "opr":
+			importOPR()
 		default:
-			log.Fatal("usage: scouting [teams]")
+			log.Fatal("usage: scouting [teams|schedule|opr]")
 		}
 	}
 }
@@ -358,5 +360,52 @@ func importSchedule() {
 	sort.Ints(event.Teams)
 	if err := datastore.UpsertEvent(event); err != nil {
 		log.Fatal("Upserting event: %v", err)
+	}
+}
+
+// importOPR handles the opr command.
+func importOPR() {
+	if flag.NArg() != 1 {
+		log.Fatal("usage: scouting opr")
+	}
+
+	datastore, err := openDatastore()
+	if err != nil {
+		log.Fatalln("Could not connect to database:", err)
+	}
+
+	r := csv.NewReader(os.Stdin)
+	for {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+		}
+
+		if len(row) != 2 {
+			log.Fatal("OPR CSV files must be number,opr")
+		}
+
+		num, err := strconv.Atoi(row[0])
+		if err != nil {
+			log.Printf("Row found with bad number: %q (%v)", row[0], err)
+			continue
+		}
+		opr, err := strconv.ParseFloat(row[1], 64)
+		if err != nil {
+			log.Printf("Row found with bad OPR: %q (%v)", row[1], err)
+			continue
+		}
+
+		team, _ := datastore.FetchTeam(num)
+		if team == nil {
+			team = &Team{Number: num}
+		}
+		team.OPR = opr
+
+		if err := datastore.UpsertTeam(team); err != nil {
+			log.Printf("Error updating team: %v", err)
+		}
 	}
 }

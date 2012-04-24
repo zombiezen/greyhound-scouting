@@ -23,11 +23,10 @@
                 <h1>Team #{{.Team.Number}}</h1>
                 {{with .Team.Name}}<h2>{{.}}</h2>{{end}}
             </hgroup>
-            {{with .Team.RookieYear}}
             <table class="info">
-                <tr><th>Rookie Year</th><td>{{.}}</td></tr>
+                {{with .Team.RookieYear}}<tr><th>Rookie Year</th><td>{{.}}</td></tr>{{end}}
+                {{with .Team.OPR}}<tr><th>OPR</th><td>{{.|printf "%.2f"}}</td></tr>{{end}}
             </table>
-            {{end}}
 
             {{with .Team.Robot}}
             {{if or .Name .Notes}}
