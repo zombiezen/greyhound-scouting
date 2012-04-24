@@ -353,12 +353,7 @@ func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo,
 	textObj.Text(fmt.Sprintf("Matches Played: %d", stats.MatchCount))
 	textObj.NextLine()
 	if stats.MatchCount != 0 {
-		textObj.Text(fmt.Sprintf("Average Score: %.1f", stats.AverageScore()))
-		textObj.NextLine()
-		textObj.Text(fmt.Sprintf("Average Teleop Hoops: %.1f", stats.AverageTeleoperatedHoops()))
-		textObj.NextLine()
-		textObj.Text(fmt.Sprintf("Average Auto Hoops: %.1f", stats.AverageAutonomousHoops()))
-		textObj.NextLine()
+		// TODO
 	}
 
 	baseline -= statStyle.FontSize + statPadding

@@ -167,8 +167,14 @@ func (store mongoDatastore) TeamEventStats(tag EventTag, number int) (TeamStats,
 		if match.Teams[i].Failure {
 			stats.FailureCount++
 		}
-		stats.AutonomousHoops.Add(match.Teams[i].Autonomous)
-		stats.TeleoperatedHoops.Add(match.Teams[i].Teleoperated)
+		if shot := stats.TeleoperatedBalls.Total(); shot > stats.MaxTeleoperatedShot {
+			stats.MaxTeleoperatedShot = shot
+		}
+		if scored := stats.TeleoperatedBalls.TotalScored(); scored > stats.MaxTeleoperatedScored {
+			stats.MaxTeleoperatedScored = scored
+		}
+		stats.AutonomousBalls.Add(match.Teams[i].Autonomous)
+		stats.TeleoperatedBalls.Add(match.Teams[i].Teleoperated)
 		stats.CoopBridge.add(match.Teams[i].CoopBridge)
 		stats.TeamBridge1.add(match.Teams[i].TeamBridge1)
 		stats.TeamBridge2.add(match.Teams[i].TeamBridge2)

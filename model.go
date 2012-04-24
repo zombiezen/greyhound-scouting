@@ -199,8 +199,8 @@ type TeamInfo struct {
 	Score    int
 
 	ScoutName    string `bson:"scout"`
-	Autonomous   HoopCount
-	Teleoperated HoopCount
+	Autonomous   BallCount
+	Teleoperated BallCount
 	CoopBridge   Bridge
 	TeamBridge1  Bridge
 	TeamBridge2  Bridge
@@ -219,8 +219,8 @@ const (
 	LowHoop
 )
 
-// HoopCount stores how many hoops were scored per robot per phase.
-type HoopCount struct {
+// BallCount stores how many balls were shot per robot per phase.
+type BallCount struct {
 	High   int
 	Mid    int
 	Low    int
@@ -228,17 +228,22 @@ type HoopCount struct {
 }
 
 // score returns the score for a hoop count for the high, mid, and low score multipliers.
-func (h HoopCount) score(high, mid, low int) int {
+func (h BallCount) score(high, mid, low int) int {
 	return h.High*high + h.Mid*mid + h.Low*low
 }
 
-// Total returns the total number of hoops scored.
-func (h HoopCount) Total() int {
+// Total returns the total number of balls shot.
+func (h BallCount) Total() int {
+	return h.High + h.Mid + h.Low + h.Missed
+}
+
+// TotalScored returns the total number of balls scored in hoops.
+func (h BallCount) TotalScored() int {
 	return h.High + h.Mid + h.Low
 }
 
 // Max returns the hoop with the maximum count.  If all hoops are zero, then NoHoop is returned.
-func (h HoopCount) Max() Hoop {
+func (h BallCount) Max() Hoop {
 	switch {
 	case h.High == 0 && h.Mid == 0 && h.Low == 0:
 		return NoHoop
@@ -251,7 +256,7 @@ func (h HoopCount) Max() Hoop {
 }
 
 // Add increments h1 by h2.
-func (h1 *HoopCount) Add(h2 HoopCount) {
+func (h1 *BallCount) Add(h2 BallCount) {
 	h1.High += h2.High
 	h1.Mid += h2.Mid
 	h1.Low += h2.Low
@@ -265,7 +270,7 @@ type Bridge struct {
 }
 
 // CalculateScore computes a team's score.
-func CalculateScore(auto, teleop HoopCount, coop, bridge1, bridge2 Bridge) int {
+func CalculateScore(auto, teleop BallCount, coop, bridge1, bridge2 Bridge) int {
 	const (
 		teleopHighPoints = 3
 		teleopMidPoints  = 2
@@ -322,8 +327,10 @@ type TeamStats struct {
 	TeamBridge1 BridgeStats
 	TeamBridge2 BridgeStats
 
-	AutonomousHoops   HoopCount
-	TeleoperatedHoops HoopCount
+	AutonomousBalls       BallCount
+	TeleoperatedBalls     BallCount
+	MaxTeleoperatedShot   int
+	MaxTeleoperatedScored int
 }
 
 // AverageScore returns the average score.  Returns 0.0 if match count is zero.
@@ -342,20 +349,36 @@ func (stats TeamStats) FailureRate() float64 {
 	return float64(stats.FailureCount) / float64(stats.MatchCount)
 }
 
-// AverageTeleoperatedHoops returns the average number of hoops scored per match.  Returns 0.0 if match count is zero.
-func (stats TeamStats) AverageTeleoperatedHoops() float64 {
+// AverageTeleoperatedShot returns the average number of balls shot per match.  Returns 0.0 if match count is zero.
+func (stats TeamStats) AverageTeleoperatedShot() float64 {
 	if stats.MatchCount == 0 {
 		return 0.0
 	}
-	return float64(stats.TeleoperatedHoops.Total()) / float64(stats.MatchCount)
+	return float64(stats.TeleoperatedBalls.Total()) / float64(stats.MatchCount)
 }
 
-// AverageAutonomousHoops returns the average number of hoops scored per match.  Returns 0.0 if match count is zero.
-func (stats TeamStats) AverageAutonomousHoops() float64 {
+// AverageTeleoperatedScored returns the average number of balls shot per match.  Returns 0.0 if match count is zero.
+func (stats TeamStats) AverageTeleoperatedScored() float64 {
 	if stats.MatchCount == 0 {
 		return 0.0
 	}
-	return float64(stats.AutonomousHoops.Total()) / float64(stats.MatchCount)
+	return float64(stats.TeleoperatedBalls.TotalScored()) / float64(stats.MatchCount)
+}
+
+// AverageAutonomousShot returns the average number of balls shot per match.  Returns 0.0 if match count is zero.
+func (stats TeamStats) AverageAutonomousShot() float64 {
+	if stats.MatchCount == 0 {
+		return 0.0
+	}
+	return float64(stats.AutonomousBalls.Total()) / float64(stats.MatchCount)
+}
+
+// AverageAutonomousScored returns the average number of balls shot per match.  Returns 0.0 if match count is zero.
+func (stats TeamStats) AverageAutonomousScored() float64 {
+	if stats.MatchCount == 0 {
+		return 0.0
+	}
+	return float64(stats.AutonomousBalls.TotalScored()) / float64(stats.MatchCount)
 }
 
 // BridgeStats holds team statistics for a particular bridge.

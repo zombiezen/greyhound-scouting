@@ -60,6 +60,12 @@ func NewServer(datastore Datastore) *Server {
 			}
 			return u, err
 		},
+		"intsum": func(xs ...int) (sum int) {
+			for _, x := range xs {
+				sum += x
+			}
+			return
+		},
 	})
 	return server
 }

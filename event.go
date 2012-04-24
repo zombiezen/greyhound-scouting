@@ -220,8 +220,8 @@ func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) err
 	vars := mux.Vars(req)
 
 	var form struct {
-		Autonomous   HoopCount
-		Teleoperated HoopCount
+		Autonomous   BallCount
+		Teleoperated BallCount
 		CoopBridge   Bridge
 		TeamBridge1  Bridge
 		TeamBridge2  Bridge
@@ -384,16 +384,27 @@ func eventSpreadsheet(server *Server, w http.ResponseWriter, req *http.Request) 
 		"Matches Played",
 		"No-Shows",
 		"Failures",
-		"Failure Rate",
 		"Average Score",
-		"Average Teleop Hoops",
-		"Average Auto Hoops",
-		"Coop Bridge Attempt Rate",
-		"Coop Bridge Success Rate",
-		"Bridge 1 Attempt Rate",
-		"Bridge 1 Success Rate",
-		"Bridge 2 Attempt Rate",
-		"Bridge 2 Success Rate",
+		"Average Teleop Scored",
+		"Average Teleop Shot",
+		"Average Auto Scored",
+		"Average Auto Shot",
+		"Max Teleop Scored",
+		"Max Teleop Shot",
+		"Coop Bridge Attempts",
+		"Coop Bridge Successes",
+		"Bridge 1 Attempts",
+		"Bridge 1 Successes",
+		"Bridge 2 Attempts",
+		"Bridge 2 Successes",
+		"Auto High",
+		"Auto Mid",
+		"Auto Low",
+		"Auto Missed",
+		"Teleop High",
+		"Teleop Mid",
+		"Teleop Low",
+		"Teleop Missed",
 	})
 
 	for _, teamNum := range event.Teams {
@@ -406,16 +417,29 @@ func eventSpreadsheet(server *Server, w http.ResponseWriter, req *http.Request) 
 			strconv.Itoa(stats.MatchCount),
 			strconv.Itoa(stats.NoShowCount),
 			strconv.Itoa(stats.FailureCount),
-			strconv.FormatFloat(stats.FailureRate(), 'f', -1, 64),
 			strconv.FormatFloat(stats.AverageScore(), 'f', -1, 64),
-			strconv.FormatFloat(stats.AverageTeleoperatedHoops(), 'f', -1, 64),
-			strconv.FormatFloat(stats.AverageAutonomousHoops(), 'f', -1, 64),
-			strconv.FormatFloat(stats.CoopBridge.AttemptRate(stats.MatchCount), 'f', -1, 64),
-			strconv.FormatFloat(stats.CoopBridge.SuccessRate(), 'f', -1, 64),
-			strconv.FormatFloat(stats.TeamBridge1.AttemptRate(stats.MatchCount), 'f', -1, 64),
-			strconv.FormatFloat(stats.TeamBridge1.SuccessRate(), 'f', -1, 64),
-			strconv.FormatFloat(stats.TeamBridge2.AttemptRate(stats.MatchCount), 'f', -1, 64),
-			strconv.FormatFloat(stats.TeamBridge2.SuccessRate(), 'f', -1, 64),
+			strconv.FormatFloat(stats.AverageTeleoperatedScored(), 'f', -1, 64),
+			strconv.FormatFloat(stats.AverageTeleoperatedShot(), 'f', -1, 64),
+			strconv.FormatFloat(stats.AverageAutonomousScored(), 'f', -1, 64),
+			strconv.FormatFloat(stats.AverageAutonomousShot(), 'f', -1, 64),
+			strconv.Itoa(stats.MaxTeleoperatedScored),
+			strconv.Itoa(stats.MaxTeleoperatedShot),
+
+			strconv.Itoa(stats.CoopBridge.AttemptCount),
+			strconv.Itoa(stats.CoopBridge.SuccessCount),
+			strconv.Itoa(stats.TeamBridge1.AttemptCount),
+			strconv.Itoa(stats.TeamBridge1.SuccessCount),
+			strconv.Itoa(stats.TeamBridge2.AttemptCount),
+			strconv.Itoa(stats.TeamBridge2.SuccessCount),
+
+			strconv.Itoa(stats.AutonomousBalls.High),
+			strconv.Itoa(stats.AutonomousBalls.Mid),
+			strconv.Itoa(stats.AutonomousBalls.Low),
+			strconv.Itoa(stats.AutonomousBalls.Missed),
+			strconv.Itoa(stats.TeleoperatedBalls.High),
+			strconv.Itoa(stats.TeleoperatedBalls.Mid),
+			strconv.Itoa(stats.TeleoperatedBalls.Low),
+			strconv.Itoa(stats.TeleoperatedBalls.Missed),
 		})
 	}
 

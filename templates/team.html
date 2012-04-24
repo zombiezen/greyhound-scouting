@@ -54,15 +54,36 @@
             {{end}}
 
             <table class="info">
-                <tr><th>Matches Played</th><td>{{.MatchCount}}</td></th>
-                <tr><th>No-Shows</th><td>{{.NoShowCount}}</td></th>
-                <tr><th>Failures</th><td>{{.FailureCount}} ({{.FailureRate}})</td></th>
-                <tr><th>Average Score</th><td>{{.AverageScore}}</td></th>
-                <tr><th>Average Teleoperated Hoops</th><td>{{.AverageTeleoperatedHoops}}</td></th>
-                <tr><th>Average Autonomous Hoops</th><td>{{.AverageAutonomousHoops}}</td></th>
+                <tr><th>Matches Played</th><td>{{.MatchCount}}</td></tr>
+                <tr>
+                    <th>Average Teleoperated</th>
+                    <td>{{.AverageTeleoperatedScored}}/{{.AverageTeleoperatedShot}}</td>
+                    <td class="stat_help">Scored/Shot</td>
+                </tr>
+                <tr>
+                    <th>Average Autonomous</th>
+                    <td>{{.AverageAutonomousScored}}/{{.AverageAutonomousShot}}</td>
+                    <td class="stat_help">Scored/Shot</td>
+                </tr>
+                <tr>
+                    <th>Max Teleoperated</th>
+                    <td>{{.MaxTeleoperatedScored}}/{{.MaxTeleoperatedShot}}</td>
+                    <td class="stat_help">Scored/Shot</td>
+                </tr>
+                <tr>
+                    <th>Bridge</th>
+                    <td>{{intsum .CoopBridge.SuccessCount .TeamBridge1.SuccessCount}}/{{intsum .CoopBridge.AttemptCount .TeamBridge1.AttemptCount}}</td>
+                    <td class="stat_help">Successes/Attempts</td>
+                </tr>
+
+                <tr><td>&nbsp;</td></tr>
+
+                <tr><th>Average Score</th><td>{{.AverageScore}}</td></tr>
                 {{template "team-bridge-stats.html" map "Label" "Coop Bridge" "Stats" .CoopBridge "TeamStats" .}}
                 {{template "team-bridge-stats.html" map "Label" "Bridge 1" "Stats" .TeamBridge1 "TeamStats" .}}
                 {{template "team-bridge-stats.html" map "Label" "Bridge 2" "Stats" .TeamBridge2 "TeamStats" .}}
+                <tr><th>No-Shows</th><td>{{.NoShowCount}}</td></tr>
+                <tr><th>Failures</th><td>{{.FailureCount}}</td><td class="stat_help">{{.FailureRate|percent}}</td></tr>
             </table>
             {{end}}
 
@@ -88,6 +109,6 @@
 {{template "watermark.html"}}
 </html>
 {{define "team-bridge-stats.html"}}
-    <tr><th>{{.Label}} Attempts</th><td>{{.Stats.AttemptCount}} ({{.Stats.AttemptRate .TeamStats.MatchCount|percent}})</td></tr>
-    <tr><th>{{.Label}} Successes</th><td>{{.Stats.SuccessCount}} ({{.Stats.SuccessRate|percent}})</td></tr>
+    <tr><th>{{.Label}} Attempts</th><td>{{.Stats.AttemptCount}}</td><td class="stat_help">{{.Stats.AttemptRate .TeamStats.MatchCount|percent}}</td></tr>
+    <tr><th>{{.Label}} Successes</th><td>{{.Stats.SuccessCount}}</td><td class="stat_help">{{.Stats.SuccessRate|percent}}</td></tr>
 {{end}}

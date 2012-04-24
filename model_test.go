@@ -6,8 +6,8 @@ import (
 
 func TestCalculateScore(t *testing.T) {
 	tests := []struct {
-		Autonomous   HoopCount
-		Teleoperated HoopCount
+		Autonomous   BallCount
+		Teleoperated BallCount
 		Coop         Bridge
 		Bridge1      Bridge
 		Bridge2      Bridge
@@ -18,16 +18,16 @@ func TestCalculateScore(t *testing.T) {
 		},
 		{
 			Expected:     1,
-			Autonomous:   HoopCount{0, 0, 0},
-			Teleoperated: HoopCount{0, 0, 1},
+			Autonomous:   BallCount{0, 0, 0, 0},
+			Teleoperated: BallCount{0, 0, 1, 0},
 			Coop:         Bridge{false, false},
 			Bridge1:      Bridge{false, false},
 			Bridge2:      Bridge{false, false},
 		},
 		{
 			Expected:     4,
-			Autonomous:   HoopCount{0, 0, 1},
-			Teleoperated: HoopCount{0, 0, 0},
+			Autonomous:   BallCount{0, 0, 1, 0},
+			Teleoperated: BallCount{0, 0, 0, 0},
 			Coop:         Bridge{false, false},
 			Bridge1:      Bridge{false, false},
 			Bridge2:      Bridge{false, false},
@@ -35,24 +35,24 @@ func TestCalculateScore(t *testing.T) {
 		// TODO: More hoop tests
 		{
 			Expected:     0,
-			Autonomous:   HoopCount{0, 0, 0},
-			Teleoperated: HoopCount{0, 0, 0},
+			Autonomous:   BallCount{0, 0, 0, 0},
+			Teleoperated: BallCount{0, 0, 0, 0},
 			Coop:         Bridge{false, false},
 			Bridge1:      Bridge{true, false},
 			Bridge2:      Bridge{false, false},
 		},
 		{
 			Expected:     10,
-			Autonomous:   HoopCount{0, 0, 0},
-			Teleoperated: HoopCount{0, 0, 0},
+			Autonomous:   BallCount{0, 0, 0, 0},
+			Teleoperated: BallCount{0, 0, 0, 0},
 			Coop:         Bridge{false, false},
 			Bridge1:      Bridge{true, true},
 			Bridge2:      Bridge{false, false},
 		},
 		{
 			Expected:     10,
-			Autonomous:   HoopCount{0, 0, 0},
-			Teleoperated: HoopCount{0, 0, 0},
+			Autonomous:   BallCount{0, 0, 0, 0},
+			Teleoperated: BallCount{0, 0, 0, 0},
 			Coop:         Bridge{false, false},
 			Bridge1:      Bridge{true, true},
 			Bridge2:      Bridge{true, true},

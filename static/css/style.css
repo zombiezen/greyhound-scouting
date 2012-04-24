@@ -89,6 +89,11 @@ td.blue_alliance, th.blue_alliance {
   td.blue_alliance :link, td.blue_alliance :visited, td.blue_alliance a:hover, th.blue_alliance :link, th.blue_alliance :visited, th.blue_alliance a:hover {
     color: inherit; }
 
+.stat_help {
+  color: #6e6e6e;
+  font-size: 80%;
+  font-style: italic; }
+
 .formtable th.red_alliance, .formtable th.blue_alliance {
   text-align: left;
   padding-bottom: 1ex; }
