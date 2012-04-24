@@ -204,7 +204,7 @@ type teamEventStatser interface {
 // renderMatchSheet creates a PDF document for a single match sheet.
 func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *Event, match *Match, statser teamEventStatser, imagestore Imagestore) error {
 	const numEntryColumns = 3
-	entryWidth := (pageWidth - reportMargin * 2) / numEntryColumns
+	entryWidth := (pageWidth - reportMargin*2) / numEntryColumns
 
 	canvas := doc.NewPage(pageWidth, pageHeight)
 	defer canvas.Close()
@@ -224,8 +224,8 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 		renderMatchSheetTeam(
 			canvas,
 			pdf.Rectangle{
-				pdf.Point{reportMargin + pdf.Unit(i) * entryWidth, pageHeight / 2},
-				pdf.Point{reportMargin + pdf.Unit(i+1) * entryWidth, pageHeight - reportMargin},
+				pdf.Point{reportMargin + pdf.Unit(i)*entryWidth, pageHeight / 2},
+				pdf.Point{reportMargin + pdf.Unit(i+1)*entryWidth, pageHeight - reportMargin},
 			},
 			teamInfo,
 			stats,
@@ -243,8 +243,8 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 		renderMatchSheetTeam(
 			canvas,
 			pdf.Rectangle{
-				pdf.Point{reportMargin + pdf.Unit(i) * entryWidth, reportMargin},
-				pdf.Point{reportMargin + pdf.Unit(i+1) * entryWidth, pageHeight / 2},
+				pdf.Point{reportMargin + pdf.Unit(i)*entryWidth, reportMargin},
+				pdf.Point{reportMargin + pdf.Unit(i+1)*entryWidth, pageHeight / 2},
 			},
 			teamInfo,
 			stats,
@@ -261,7 +261,7 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 
 	canvas.SetColor(matchStyle.R, matchStyle.G, matchStyle.B)
 	canvas.Push()
-	canvas.Translate(pageWidth - reportMargin - textObj.X(), reportMargin)
+	canvas.Translate(pageWidth-reportMargin-textObj.X(), reportMargin)
 	canvas.DrawText(&textObj)
 	canvas.Pop()
 
@@ -333,13 +333,13 @@ func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo,
 		textObj.NextLine()
 		textObj.Text(fmt.Sprintf("Max Teleop Balls: %d / %d", stats.MaxTeleoperatedScored, stats.MaxTeleoperatedShot))
 		textObj.NextLine()
-		textObj.Text(fmt.Sprintf("Bridge: %d / %d", stats.CoopBridge.SuccessCount + stats.TeamBridge1.SuccessCount, stats.CoopBridge.AttemptCount + stats.TeamBridge1.SuccessCount))
+		textObj.Text(fmt.Sprintf("Bridge: %d / %d", stats.CoopBridge.SuccessCount+stats.TeamBridge1.SuccessCount, stats.CoopBridge.AttemptCount+stats.TeamBridge1.SuccessCount))
 		textObj.NextLine()
 	}
 
 	canvas.SetColor(statStyle.R, statStyle.G, statStyle.B)
 	canvas.Push()
-	canvas.Translate(rect.Min.X, imageBorderRect.Min.Y - (statStyle.FontSize + statPadding))
+	canvas.Translate(rect.Min.X, imageBorderRect.Min.Y-(statStyle.FontSize+statPadding))
 	canvas.DrawText(&textObj)
 	canvas.Pop()
 }
@@ -394,7 +394,7 @@ func (style strokeStyle) Line(canvas *pdf.Canvas, pt1, pt2 pdf.Point) {
 }
 
 type fillStyle struct {
-	R, G, B   float32
+	R, G, B float32
 }
 
 // Rect fills a rectangle.
