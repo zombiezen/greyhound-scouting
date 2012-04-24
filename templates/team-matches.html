@@ -1,0 +1,69 @@
+{{template "doctype.html"}}
+<html>
+<head>
+    <title>{{.Event.Location.Name}} &mdash; Team {{.TeamNumber}}</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    {{template "css.html"}}
+</head>
+<body>
+    <header>
+        {{template "logo.html"}}
+        <nav>
+            {{template "jumpbar.html"}}
+            <span class="links">
+                {{template "default-links.html"}}
+            </span>
+        </nav>
+    </header>
+    <div id="main">
+        <div id="content_area">
+            <!-- begin content -->
+            <hgroup>
+                <h1>{{with .TeamNumber}}<a href="{{route "team.view" "number" .}}">Team #{{.}}</a>{{end}}</h1>
+                <h2>{{with .Event}}<a href="{{route "event.view" "year" .Date.Year "location" .Location.Code}}">{{.Location.Name}} ({{.Date.Year}})</a>{{end}}</h2>
+            </hgroup>
+
+            <table class="listing">
+                <thead>
+                    <tr>
+                        <th class="match" scope="col">Match</th>
+                        <th class="red_alliance" scope="col">Red Alliance</th>
+                        <th class="red_alliance score" scope="col">Red Score</th>
+                        <th class="blue_alliance" scope="col">Blue Alliance</th>
+                        <th class="blue_alliance score" scope="col">Blue Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $i, $match := .Matches}}
+                    <tr class="{{cycle $i "odd" "even"}}">
+                        <td class="match">
+                            {{with $match}}
+                            <a href="{{route "match.view" "year" $.Event.Date.Year "location" $.Event.Location.Code "matchType" .Type "matchNumber" .Number}}">{{.Type.DisplayName}} {{.Number}}</a>
+                            {{end}}
+                        </td>
+                        {{template "team-matches-alliance-info.html" $match.AllianceInfo "red"|map "TeamNumber" $.TeamNumber "AllianceInfo"}}
+                        {{template "team-matches-alliance-info.html" $match.AllianceInfo "blue"|map "TeamNumber" $.TeamNumber "AllianceInfo"}}
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            <!-- end content -->
+        </div>
+    </div>
+    {{template "footer.html"}}
+
+    {{template "jquery.html"}}
+</body>
+{{template "watermark.html"}}
+</html>
+{{define "team-matches-alliance-info.html"}}
+    {{with .AllianceInfo}}
+    <td class="{{.Alliance}}_alliance{{if .Won}} winner{{end}}">
+        {{range .Teams}}
+        {{with .Team}}<a href="{{route "team.view" "number" .}}"{{if eq $.TeamNumber .}} class="team_highlight"{{end}}>{{.}}</a>{{end}}
+            {{/* TODO: Add commas */}}
+        {{end}}
+    </td>
+    <td class="{{.Alliance}}_alliance score{{if .Won}} winner{{end}}">{{.Score}}</td>
+    {{end}}
+{{end}}
