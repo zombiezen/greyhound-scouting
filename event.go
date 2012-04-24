@@ -98,7 +98,7 @@ func teamMatches(server *Server, w http.ResponseWriter, req *http.Request) error
 	}
 
 	// Fetch matches
-	matches, err := server.Store().FetchMatches(event.Tag())
+	matches, err := server.Store().TeamEventMatches(event.Tag(), teamNumber)
 	if err != nil {
 		return err
 	}
