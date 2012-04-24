@@ -226,6 +226,8 @@ func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) err
 		TeamBridge1  Bridge
 		TeamBridge2  Bridge
 		ScoutName    string
+		Failure      bool
+		NoShow       bool
 	}
 
 	// Fetch event
@@ -281,6 +283,8 @@ func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) err
 		teamInfo.TeamBridge1 = form.TeamBridge1
 		teamInfo.TeamBridge2 = form.TeamBridge2
 		teamInfo.ScoutName = form.ScoutName
+		teamInfo.Failure = form.Failure
+		teamInfo.NoShow = form.NoShow
 		teamInfo.Score = CalculateScore(teamInfo.Autonomous, teamInfo.Teleoperated, teamInfo.CoopBridge, teamInfo.TeamBridge1, teamInfo.TeamBridge2)
 		if err := server.Store().UpdateMatchTeam(MatchTag{event.Tag(), match.Type, uint(match.Number)}, teamNumber, *teamInfo); err != nil {
 			return err
@@ -300,6 +304,8 @@ func editMatchTeam(server *Server, w http.ResponseWriter, req *http.Request) err
 		form.TeamBridge1 = teamInfo.TeamBridge1
 		form.TeamBridge2 = teamInfo.TeamBridge2
 		form.ScoutName = teamInfo.ScoutName
+		form.Failure = teamInfo.Failure
+		form.NoShow = teamInfo.NoShow
 	}
 
 	return server.Templates().ExecuteTemplate(w, "match-edit-team.html", map[string]interface{}{

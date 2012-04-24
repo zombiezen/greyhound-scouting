@@ -62,6 +62,12 @@
                         <tr>
                             {{template "match-bridgeCellPair.html" map "Label" "Bridge 2" "Red" .Red.TeamBridge2 "Blue" .Blue.TeamBridge2}}
                         </tr>
+                        <tr>
+                            {{template "match-boolCellPair.html" map "Label" "Failure" "Red" .Red.Failure "Blue" .Blue.Failure}}
+                        </tr>
+                        <tr>
+                            {{template "match-boolCellPair.html" map "Label" "No Show" "Red" .Red.NoShow "Blue" .Blue.NoShow}}
+                        </tr>
 
                         {{end}}
                     </tbody>

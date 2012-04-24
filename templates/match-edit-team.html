@@ -95,6 +95,18 @@
                         </td>
                     </tr>
                     <tr>
+                        <th>Failure:</th>
+                        <td>
+                            <input name="Failure" type="checkbox" value="1"{{if .Failure}} checked{{end}}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>No Show:</th>
+                        <td>
+                            <input name="NoShow" type="checkbox" value="1"{{if .NoShow}} checked{{end}}>
+                        </td>
+                    </tr>
+                    <tr>
                         <th>Scout Name:</th>
                         <td>
                             <input name="ScoutName" type="text" value="{{.ScoutName}}">
