@@ -66,6 +66,12 @@ func NewServer(datastore Datastore) *Server {
 			}
 			return
 		},
+		"convertint": func(x interface{}) (int, error) {
+			if i, ok := x.(int); ok {
+				return i, nil
+			}
+			return 0, fmt.Errorf("%v is not an int", x)
+		},
 	})
 	return server
 }

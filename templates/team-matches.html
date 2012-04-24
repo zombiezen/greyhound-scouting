@@ -31,6 +31,11 @@
                         <th class="red_alliance score" scope="col">Red Score</th>
                         <th class="blue_alliance" scope="col">Blue Alliance</th>
                         <th class="blue_alliance score" scope="col">Blue Score</th>
+                        <th scope="col">Teleop</th>
+                        <th scope="col">Auto</th>
+                        <th scope="col">Coop Bridge</th>
+                        <th scope="col">Bridge 1</th>
+                        <th scope="col">Bridge 2</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,6 +48,13 @@
                         </td>
                         {{template "team-matches-alliance-info.html" $match.AllianceInfo "red"|map "TeamNumber" $.TeamNumber "AllianceInfo"}}
                         {{template "team-matches-alliance-info.html" $match.AllianceInfo "blue"|map "TeamNumber" $.TeamNumber "AllianceInfo"}}
+                        {{with convertint $.TeamNumber|$match.TeamInfo}}
+                        {{template "team-matches-ballcount.html" .Teleoperated}}
+                        {{template "team-matches-ballcount.html" .Autonomous}}
+                        {{template "team-matches-bridge.html" .CoopBridge}}
+                        {{template "team-matches-bridge.html" .TeamBridge1}}
+                        {{template "team-matches-bridge.html" .TeamBridge2}}
+                        {{end}}
                     </tr>
                     {{end}}
                 </tbody>
@@ -66,4 +78,10 @@
     </td>
     <td class="{{.Alliance}}_alliance score{{if .Won}} winner{{end}}">{{.Score}}</td>
     {{end}}
+{{end}}
+{{define "team-matches-ballcount.html"}}
+    <td>H{{.High}} M{{.Mid}} L{{.Low}}</td>
+{{end}}
+{{define "team-matches-bridge.html"}}
+    <td>{{if .Attempted}}{{if .Success}}Success{{else}}Failed{{end}}{{else}}Not Attempted{{end}}</td>
 {{end}}
