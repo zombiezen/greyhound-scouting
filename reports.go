@@ -256,8 +256,7 @@ func renderMatchSheet(doc *pdf.Document, pageWidth, pageHeight pdf.Unit, event *
 	matchStyle := textStyle{pdf.HelveticaBold, 18, 0, 0, 0}
 	var textObj pdf.Text
 	textObj.SetFont(matchStyle.FontName, matchStyle.FontSize)
-	//textObj.Text(fmt.Sprintf("%s %d", match.Type.DisplayName(), match.Number))
-	textObj.Text("Qualification 155")
+	textObj.Text(fmt.Sprintf("%s %d", match.Type.DisplayName(), match.Number))
 
 	canvas.SetColor(matchStyle.R, matchStyle.G, matchStyle.B)
 	canvas.Push()
@@ -301,18 +300,20 @@ func renderMatchSheetTeam(canvas *pdf.Canvas, rect pdf.Rectangle, info TeamInfo,
 			var ir pdf.Rectangle
 			placeAspect := float32(imageBorderRect.Dx()) / float32(imageBorderRect.Dy())
 			imageAspect := float32(img.Bounds().Dx()) / float32(img.Bounds().Dy())
-			ir.Max.Y = imageBorderRect.Max.Y
 			if placeAspect >= imageAspect {
 				// Place is wider than image aspect
 				w := imageHeight * pdf.Unit(imageAspect)
 				ir.Min.X = (rect.Min.X + rect.Max.X - w) / 2
 				ir.Max.X = ir.Min.X + w
+				ir.Max.Y = imageBorderRect.Max.Y
 				ir.Min.Y = ir.Max.Y - imageHeight
 			} else {
 				// Image is wider than place aspect
 				ir.Min.X = rect.Min.X
 				ir.Max.X = rect.Max.X
-				ir.Min.Y = ir.Max.Y - ir.Dx()/pdf.Unit(imageAspect)
+				h := ir.Dx()/pdf.Unit(imageAspect)
+				ir.Min.Y = imageBorderRect.Min.Y + (imageBorderRect.Dy() - h) / 2
+				ir.Max.Y = ir.Min.Y + h
 			}
 			canvas.DrawImage(img, ir)
 		}
